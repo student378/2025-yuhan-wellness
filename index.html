@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YUHAN WELLNESS STATION 이용 현황</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js">
+// ═══════════════════════════════════════════════
+// 공유 · 인쇄 기능
+// ═══════════════════════════════════════════════
+function handleShare(){
+  const url = window.location.href;
+  document.getElementById('shareUrlInput').value = url;
+  document.getElementById('shareModal').classList.add('open');
+}
+function closeShare(){
+  document.getElementById('shareModal').classList.remove('open');
+}
+function copyUrl(){
+  const input = document.getElementById('shareUrlInput');
+  input.select();
+  input.setSelectionRange(0,99999);
+  const btn = document.getElementById('shareCopyBtn');
+  try{
+    navigator.clipboard.writeText(input.value).then(()=>{
+      btn.textContent='✓ 복사됨'; btn.classList.add('copied');
+      setTimeout(()=>{btn.textContent='복사';btn.classList.remove('copied');},2000);
+    });
+  }catch(e){
+    document.execCommand('copy');
+    btn.textContent='✓ 복사됨'; btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='복사';btn.classList.remove('copied');},2000);
+  }
+}
+function shareViaEmail(){
+  const url = window.location.href;
+  const sub = encodeURIComponent('유한대학교 웰니스 스테이션 2025 이용 현황 대시보드');
+  const body = encodeURIComponent('안녕하세요.\n\n2025학년도 웰니스 스테이션 이용 현황 대시보드를 공유드립니다.\n\n▶ 대시보드 링크: ' + url + '\n\n브라우저에서 바로 열람하실 수 있습니다.');
+  window.open('mailto:?subject='+sub+'&body='+body);
+  closeShare();
+}
+function shareViaKakao(){
+  copyUrl();
+  alert('링크가 클립보드에 복사되었습니다.\n카카오톡을 열어 붙여넣기(Ctrl+V)로 전송하세요.');
+  closeShare();
+}
+function downloadHtml(){
+  const blob = new Blob([document.documentElement.outerHTML], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'wellness_dashboard_2025.html';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  closeShare();
+}
+function printDashboard(){
+  // 현재 활성 탭 제목 가져오기
+  const activeBtn = document.querySelector('.tab-btn.active');
+  const tabTitle = activeBtn ? activeBtn.textContent.trim() : '';
+  const ph = document.getElementById('printHeaderEl');
+  if(ph) ph.querySelector('p').textContent =
+    '현재 탭: ' + tabTitle + '  |  기준일: 2025.12.31  |  총이용건수 9,125건  |  방문횟수 8,206회  |  고유학생 2,241명';
+  window.print();
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeShare(); });
+
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f4f9;--surface:#fff;--surface2:#f7f9fc;--border:#e2e8f2;
+  --shadow:0 2px 12px rgba(60,80,130,.08);--shadow-md:0 4px 24px rgba(60,80,130,.13);
+  --c1:#2563eb;--c1l:#dbeafe;--c2:#f97316;--c2l:#ffedd5;
+  --c3:#10b981;--c3l:#d1fae5;--c4:#f59e0b;--c4l:#fef3c7;--c5:#8b5cf6;
+  --c1a:rgba(37,99,235,.72);--c2a:rgba(249,115,22,.72);
+  --c3a:rgba(16,185,129,.72);--c4a:rgba(245,158,11,.72);
+  --text:#1e2d52;--text2:#4b5a7a;--muted:#94a3b8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:13px;line-height:1.6;min-height:100vh;}
+
+/* HEADER */
+.header{background:#fff;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 6px rgba(60,80,130,.07);}
+.header-left{display:flex;align-items:center;gap:14px;}
+.logo{width:42px;height:42px;background:linear-gradient(135deg,var(--c1),#60a5fa);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:#fff;box-shadow:0 4px 12px rgba(37,99,235,.35);}
+.header-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
+.header-sub{font-size:11px;color:var(--muted);}
+.header-kpis{display:flex;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.hkpi{padding:10px 20px;text-align:center;border-right:1px solid var(--border);}
+.hkpi:last-child{border-right:none;}
+.hkpi-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800;color:var(--c1);}
+.hkpi-label{font-size:10px;color:var(--muted);letter-spacing:.2px;margin-top:1px;}
+.header-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);background:var(--surface2);padding:6px 12px;border-radius:8px;border:1px solid var(--border);}
+
+/* NAV */
+.nav{background:#fff;border-bottom:1px solid var(--border);padding:0 28px;display:flex;}
+.tab-btn{padding:11px 16px;background:none;border:none;color:var(--muted);font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--c1);border-bottom-color:var(--c1);font-weight:700;}
+
+/* LAYOUT */
+.content{padding:20px 28px;}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;animation:fadeUp .25s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:16px;}
+.full{margin-bottom:16px;}
+
+/* KPI */
+.kpi{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s;}
+.kpi:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.kpi-top{position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;}
+.kpi-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px;}
+.kpi-label{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:3px;}
+.kpi-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:30px;font-weight:800;line-height:1;}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:5px;}
+.kpi-prog{height:4px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden;}
+.kpi-fill{height:100%;border-radius:2px;}
+
+/* CARD */
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:var(--shadow);}
+.card-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.card-sub{font-size:11px;color:var(--muted);margin-bottom:14px;}
+.cw canvas{max-height:240px;}
+.cw-md canvas{max-height:280px;}
+.cw-lg canvas{max-height:320px;}
+.cw-sm canvas{max-height:190px;}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px;}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);}
+.ld{width:10px;height:10px;border-radius:3px;}
+
+/* INSIGHT */
+.ig{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.ins{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+.ins-ico{font-size:22px;margin-bottom:5px;}
+.ins-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;}
+.ins-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;}
+.ins-desc{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* DONUT ROWS */
+.dr-rows{display:flex;flex-direction:column;gap:6px;margin-top:14px;}
+.dr-row{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);}
+.dr-lbl{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text2);}
+.dr-dot{width:9px;height:9px;border-radius:3px;}
+.dr-pct{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;}
+.dr-cnt{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+
+/* DEPT TABLE */
+.dept-scroll{max-height:400px;overflow-y:auto;}
+.dept-scroll::-webkit-scrollbar{width:4px;}
+.dept-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.dr-rank{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);width:18px;flex-shrink:0;}
+.dr-name{flex:1;font-size:11px;color:var(--text);}
+.dr-bar{width:90px;height:6px;background:var(--border);border-radius:3px;flex-shrink:0;}
+.dr-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--c1),#60a5fa);}
+.dr-v{font-family:'DM Mono',monospace;font-size:11px;color:var(--c1);width:34px;text-align:right;flex-shrink:0;font-weight:600;}
+.dr-u{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);width:32px;text-align:right;flex-shrink:0;}
+.dept-row-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);}
+
+/* NOTE */
+.note{background:var(--c1l);border:1px solid #bfdbfe;border-radius:10px;padding:10px 14px;font-size:11px;color:#1d4ed8;margin-bottom:14px;display:flex;gap:8px;align-items:flex-start;}
+
+/* SCROLL */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:#f0f4f9;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* 학과별 상세 테이블 */
+.dd-table{width:100%;border-collapse:collapse;font-size:12px;}
+.dd-table th{padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);border-bottom:2px solid var(--border);white-space:nowrap;background:var(--surface2);cursor:pointer;user-select:none;}
+.dd-table th:hover{color:var(--c1);}
+.dd-table th.sort-active{color:var(--c1);}
+.dd-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.dd-table tbody tr:hover td{background:var(--surface2);}
+.dd-table tfoot td{padding:10px 12px;font-weight:700;color:var(--c1);background:var(--c1l);border-top:2px solid var(--c1);}
+.dd-num{font-family:'DM Mono',monospace;text-align:right;}
+.dd-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;}
+.dd-fac-badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;}
+.dd-ratio-bar{display:flex;height:7px;border-radius:4px;overflow:hidden;gap:1px;min-width:90px;}
+.dd-prog-wrap{display:flex;align-items:center;gap:7px;}
+.dd-prog{width:44px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;flex-shrink:0;}
+.dd-prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--c1),#60a5fa);}
+.filter-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;background:#fff;border:1px solid var(--border);border-radius:12px;margin-bottom:12px;box-shadow:var(--shadow);}
+.filter-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;font-family:'Noto Sans KR',sans-serif;}
+.filter-btn:hover{border-color:var(--c1);color:var(--c1);}
+.filter-btn.on{border-color:var(--c1);background:var(--c1l);color:var(--c1);font-weight:700;}
+.search-box{padding:6px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'Noto Sans KR',sans-serif;color:var(--text);background:#fff;width:150px;outline:none;}
+.search-box:focus{border-color:var(--c1);}
+
+/* ── 헤더 액션 버튼 */
+.hdr-btn{display:flex;align-items:center;gap:5px;padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:#fff;color:var(--text2);font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;}
+.hdr-btn:hover{background:var(--bg);box-shadow:0 2px 8px rgba(60,80,130,.12);}
+.hdr-btn-print{background:var(--c1);border-color:var(--c1);color:#fff;}
+.hdr-btn-print:hover{background:#1d4ed8;border-color:#1d4ed8;}
+
+/* ── 공유 모달 */
+.share-modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);align-items:center;justify-content:center;}
+.share-modal.open{display:flex;}
+.share-box{background:#fff;border-radius:18px;padding:28px 28px 24px;width:440px;max-width:94vw;box-shadow:0 20px 60px rgba(0,0,0,.22);}
+.share-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;}
+.share-desc{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.5;}
+.share-url-row{display:flex;gap:8px;margin-bottom:14px;}
+.share-url-input{flex:1;border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);background:var(--surface2);outline:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.share-url-input:focus{border-color:var(--c1);}
+.share-copy-btn{padding:9px 16px;background:var(--c1);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .18s;}
+.share-copy-btn:hover{background:#1d4ed8;}
+.share-copy-btn.copied{background:var(--c3);}
+.share-methods{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px;}
+.share-method{border:1.5px solid var(--border);border-radius:11px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .18s;background:#fff;}
+.share-method:hover{border-color:var(--c1);background:var(--c1l);}
+.share-method-ico{font-size:22px;margin-bottom:4px;}
+.share-method-lbl{font-size:11px;font-weight:600;color:var(--text2);}
+.share-method-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+.share-notice{background:#f0f9ff;border:1px solid #bae6fd;border-radius:9px;padding:10px 14px;font-size:11px;color:#0369a1;line-height:1.6;}
+.share-notice b{color:#0c4a6e;}
+.share-close{margin-top:16px;width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text2);}
+.share-close:hover{background:var(--border);}
+
+/* ── 인쇄 전용 CSS */
+@media print{
+  .header,.nav,.hdr-btn,#shareModal,.share-modal,
+  button,[onclick]{display:none!important;}
+  body{background:#fff!important;font-size:11px;}
+  .content{padding:8px!important;}
+  .tab-pane{display:none!important;}
+  .tab-pane.active{display:block!important;}
+  .card{break-inside:avoid;box-shadow:none!important;border:1px solid #e2e8f2!important;}
+  .kpi{break-inside:avoid;}
+  .g4,.g2,.g21{grid-template-columns:repeat(2,1fr)!important;}
+  .print-header{display:block!important;}
+  canvas{max-width:100%;}
+  @page{size:A4 landscape;margin:12mm 10mm;}
+}
+.print-header{display:none;font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:14px;}
+.print-header h2{font-size:16px;font-weight:800;color:#1e2d52;}
+.print-header p{font-size:10px;color:#94a3b8;margin-top:2px;}
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">W</div>
+    <div>
+      <div class="header-title">YUHAN WELLNESS STATION</div>
+      <div class="header-sub">2025학년도 이용 현황 분석 대시보드</div>
+    </div>
+  </div>
+  <div class="header-kpis">
+    <div class="hkpi"><div class="hkpi-val">9,125</div><div class="hkpi-label">총 이용건수 (시설합계)</div></div>
+    <div class="hkpi"><div class="hkpi-val" style="color:var(--c3)">8,206</div><div class="hkpi-label">총 방문횟수 (이용자수)</div></div>
+    <div class="hkpi"><div class="hkpi-val" style="color:var(--c2)">2,241</div><div class="hkpi-label">고유 이용학생수</div></div>
+    <div class="hkpi"><div class="hkpi-val" style="color:var(--c5)">49</div><div class="hkpi-label">참여 학과수</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button class="hdr-btn" id="shareBtn" onclick="handleShare()" title="링크 공유">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      공유
+    </button>
+    <button class="hdr-btn hdr-btn-print" onclick="printDashboard()" title="현재 탭 인쇄">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      인쇄
+    </button>
+    <div class="header-date">마지막 업데이트 : 2025년 12월 31일</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="tab-btn active" onclick="switchTab('overview',this)">📊 종합 현황</button>
+  <button class="tab-btn" onclick="switchTab('facility',this)">🏋️ 시설별 분석</button>
+  <button class="tab-btn" onclick="switchTab('time',this)">⏰ 시간·요일 분석</button>
+  <button class="tab-btn" onclick="switchTab('dept',this)">🏫 학과·계열 분석</button>
+  <button class="tab-btn" onclick="switchTab('user',this)">👥 이용자 분석</button>
+  <button class="tab-btn" onclick="switchTab('deptdetail',this)">📋 학과별 상세</button>
+</div>
+
+<div class="content">
+
+<!-- ====== TAB 1 종합현황 ====== -->
+<div id="tab-overview" class="tab-pane active">
+  <div class="note">💡 <div><b>집계 기준</b> — 이용자수(방문횟수) = Q열(누적) 행 수. 1명이 인생네컷+코인노래방 동시 이용 시 <b>이용자수 1명, 이용건수 2건</b>.</div></div>
+  <div class="g4">
+    <div class="kpi"><div class="kpi-top" style="background:var(--c1)"></div><div class="kpi-ico" style="background:var(--c1l)">📸</div><div class="kpi-label">인생네컷 이용건수</div><div class="kpi-val" style="color:var(--c1)">1,422</div><div class="kpi-sub">전체 15.6%</div><div class="kpi-prog"><div class="kpi-fill" style="width:15.6%;background:var(--c1)"></div></div></div>
+    <div class="kpi"><div class="kpi-top" style="background:var(--c2)"></div><div class="kpi-ico" style="background:var(--c2l)">🎤</div><div class="kpi-label">코인노래방 이용건수</div><div class="kpi-val" style="color:var(--c2)">3,611</div><div class="kpi-sub">전체 39.6% 1위</div><div class="kpi-prog"><div class="kpi-fill" style="width:39.6%;background:var(--c2)"></div></div></div>
+    <div class="kpi"><div class="kpi-top" style="background:var(--c3)"></div><div class="kpi-ico" style="background:var(--c3l)">🏓</div><div class="kpi-label">탁구장 이용건수</div><div class="kpi-val" style="color:var(--c3)">2,364</div><div class="kpi-sub">전체 25.9%</div><div class="kpi-prog"><div class="kpi-fill" style="width:25.9%;background:var(--c3)"></div></div></div>
+    <div class="kpi"><div class="kpi-top" style="background:var(--c4)"></div><div class="kpi-ico" style="background:var(--c4l)">💪</div><div class="kpi-label">헬스장 이용건수</div><div class="kpi-val" style="color:var(--c4)">1,728</div><div class="kpi-sub">전체 18.9%</div><div class="kpi-prog"><div class="kpi-fill" style="width:18.9%;background:var(--c4)"></div></div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">월별 이용현황</div><div class="card-sub">시설별 이용건수 (스택)</div>
+      <div class="legend"><div class="li"><div class="ld" style="background:var(--c1)"></div>인생네컷</div><div class="li"><div class="ld" style="background:var(--c2)"></div>코인노래방</div><div class="li"><div class="ld" style="background:var(--c3)"></div>탁구장</div><div class="li"><div class="ld" style="background:var(--c4)"></div>헬스장</div></div>
+      <div class="cw-md"><canvas id="monthlyBar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">시설별 이용건수 비중</div><div class="card-sub">전체 9,125건 기준</div>
+      <div class="cw-sm"><canvas id="facilityDonut"></canvas></div>
+      <div class="dr-rows">
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c2)"></div>코인노래방</div><div class="dr-pct" style="color:var(--c2)">39.6%</div><div class="dr-cnt">3,611건</div></div>
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c3)"></div>탁구장</div><div class="dr-pct" style="color:var(--c3)">25.9%</div><div class="dr-cnt">2,364건</div></div>
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c4)"></div>헬스장</div><div class="dr-pct" style="color:var(--c4)">18.9%</div><div class="dr-cnt">1,728건</div></div>
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c1)"></div>인생네컷</div><div class="dr-pct" style="color:var(--c1)">15.6%</div><div class="dr-cnt">1,422건</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-title">요일별 이용현황</div><div class="card-sub">요일별 시설 이용건수 스택</div><div class="cw"><canvas id="dailyBar"></canvas></div></div>
+    <div class="card"><div class="card-title">월별 방문횟수 추이</div><div class="card-sub">학기 중 이용 흐름</div><div class="cw"><canvas id="monthlyLine"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ====== TAB 2 시설별 ====== -->
+<div id="tab-facility" class="tab-pane">
+  <div class="ig">
+    <div class="ins"><div class="ins-ico">💪</div><div class="ins-title">헬스장 평균 이용시간</div><div class="ins-val" style="color:var(--c4)">58.0분</div><div class="ins-desc">4개 시설 중 최장</div></div>
+    <div class="ins"><div class="ins-ico">🏓</div><div class="ins-title">탁구장 평균 이용시간</div><div class="ins-val" style="color:var(--c3)">40.0분</div><div class="ins-desc">운동 시설 평균</div></div>
+    <div class="ins"><div class="ins-ico">🎤</div><div class="ins-title">코인노래방 평균 이용시간</div><div class="ins-val" style="color:var(--c2)">36.6분</div><div class="ins-desc">점심 피크 집중</div></div>
+    <div class="ins"><div class="ins-ico">📷</div><div class="ins-title">인생네컷 평균 이용시간</div><div class="ins-val" style="color:var(--c1)">18.4분</div><div class="ins-desc">빠른 회전율</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-title">시설별 평균 이용시간</div><div class="card-sub">분 단위 평균 체류 시간</div><div class="cw"><canvas id="avgTimeBar"></canvas></div></div>
+    <div class="card"><div class="card-title">시설별 월별 이용 추이</div><div class="card-sub">각 시설 이용건수 월간 변화</div><div class="cw"><canvas id="facilityMonthLine"></canvas></div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">다중 시설 이용 패턴</div><div class="card-sub">1회 방문 시 이용 시설 수 분포</div>
+      <div class="cw-sm"><canvas id="multiDonut"></canvas></div>
+      <div class="dr-rows">
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c1)"></div>1개 시설만</div><div class="dr-pct" style="color:var(--c1)">89.5%</div><div class="dr-cnt">7,347회</div></div>
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c2)"></div>2개 시설</div><div class="dr-pct" style="color:var(--c2)">9.7%</div><div class="dr-cnt">798회</div></div>
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c3)"></div>3개 시설</div><div class="dr-pct" style="color:var(--c3)">0.7%</div><div class="dr-cnt">58회</div></div>
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c4)"></div>4개 전부</div><div class="dr-pct" style="color:var(--c4)">0.02%</div><div class="dr-cnt">2회</div></div>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">복합 이용 인기 조합 Top 8</div><div class="card-sub">다중 이용 시 조합별 건수</div><div class="cw-md"><canvas id="comboBar"></canvas></div></div>
+  </div>
+  <div class="card full">
+    <div class="card-title">시간대별 시설 이용 현황</div><div class="card-sub">입실 시간대별 각 시설 이용건수</div>
+    <div class="legend"><div class="li"><div class="ld" style="background:var(--c1)"></div>인생네컷</div><div class="li"><div class="ld" style="background:var(--c2)"></div>코인노래방</div><div class="li"><div class="ld" style="background:var(--c3)"></div>탁구장</div><div class="li"><div class="ld" style="background:var(--c4)"></div>헬스장</div></div>
+    <div class="cw-md"><canvas id="hourFacilityBar"></canvas></div>
+  </div>
+</div>
+
+<!-- ====== TAB 3 시간·요일 ====== -->
+<div id="tab-time" class="tab-pane">
+  <div class="ig">
+    <div class="ins"><div class="ins-ico">📅</div><div class="ins-title">최다 방문 월</div><div class="ins-val" style="color:var(--c2)">4월</div><div class="ins-desc">1,891회 (23.0%)</div></div>
+    <div class="ins"><div class="ins-ico">📆</div><div class="ins-title">최다 방문 요일</div><div class="ins-val" style="color:var(--c3)">수요일</div><div class="ins-desc">1,922회 (23.4%)</div></div>
+    <div class="ins"><div class="ins-ico">🕐</div><div class="ins-title">피크 입실 시간</div><div class="ins-val" style="color:var(--c1)">12시</div><div class="ins-desc">1,896회 · 점심 피크</div></div>
+    <div class="ins"><div class="ins-ico">📉</div><div class="ins-title">방학 중 방문</div><div class="ins-val" style="color:var(--muted)">197회</div><div class="ins-desc">7~8월 제한 운영</div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">요일별 방문횟수</div><div class="card-sub">시설별 요일 이용건수 스택</div>
+      <div class="legend"><div class="li"><div class="ld" style="background:var(--c1)"></div>인생네컷</div><div class="li"><div class="ld" style="background:var(--c2)"></div>코인노래방</div><div class="li"><div class="ld" style="background:var(--c3)"></div>탁구장</div><div class="li"><div class="ld" style="background:var(--c4)"></div>헬스장</div></div>
+      <div class="cw-lg"><canvas id="dayStacked"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title">시간대별 방문현황</div><div class="card-sub">입실 시간대별 방문횟수 (8시~17시)</div><div class="cw-lg"><canvas id="hourLine"></canvas></div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">학기별 방문 현황</div><div class="card-sub">1학기 vs 2학기 vs 방학</div>
+      <div class="cw-sm"><canvas id="semesterDonut"></canvas></div>
+      <div class="dr-rows">
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c1)"></div>1학기 (3~6월)</div><div class="dr-pct" style="color:var(--c1)">53.9%</div><div class="dr-cnt">4,422회</div></div>
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c3)"></div>2학기 (9~12월)</div><div class="dr-pct" style="color:var(--c3)">43.7%</div><div class="dr-cnt">3,587회</div></div>
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--muted)"></div>방학 (7~8월)</div><div class="dr-pct">2.4%</div><div class="dr-cnt">197회</div></div>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">이용시간 구간별 분포</div><div class="card-sub">방문 1회당 총 체류 시간 구간</div><div class="cw"><canvas id="timeDist"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ====== TAB 4 학과·계열 ====== -->
+<div id="tab-dept" class="tab-pane">
+  <div class="g21">
+    <div class="card">
+      <div class="card-title">학과별 방문횟수 Top 30</div><div class="card-sub">방문횟수(이용자수) · 이용건수(시설합계)</div>
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;padding:0 0 8px;border-bottom:1px solid var(--border);">
+        <span style="font-size:10px;color:var(--muted);font-weight:600;">학과명</span>
+        <span style="flex:1"></span>
+        <span style="font-size:10px;color:var(--muted);width:90px;text-align:right;font-weight:600;">방문 비율</span>
+        <span style="font-size:10px;color:var(--c1);width:34px;text-align:right;font-weight:600;">방문</span>
+        <span style="font-size:10px;color:var(--muted);width:32px;text-align:right;font-weight:600;">건수</span>
+      </div>
+      <div class="dept-scroll" id="deptList"></div>
+    </div>
+    <div class="card"><div class="card-title">계열별 방문횟수 비교</div><div class="card-sub">방문횟수(이용자수) 기준</div><div class="cw"><canvas id="seriesBar"></canvas></div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">계열별 선호 시설</div><div class="card-sub">계열별 시설 이용건수 구성 비교</div>
+      <div class="legend"><div class="li"><div class="ld" style="background:var(--c1)"></div>인생네컷</div><div class="li"><div class="ld" style="background:var(--c2)"></div>코인노래방</div><div class="li"><div class="ld" style="background:var(--c3)"></div>탁구장</div><div class="li"><div class="ld" style="background:var(--c4)"></div>헬스장</div></div>
+      <div class="cw-lg"><canvas id="seriesStacked"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">계열별 고유 이용학생수</div><div class="card-sub">학번 unique 기준</div>
+      <div class="cw-sm"><canvas id="seriesUserDonut"></canvas></div>
+      <div class="dr-rows">
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c1)"></div>자연과학</div><div class="dr-pct" style="color:var(--c1)">29.6%</div><div class="dr-cnt">663명</div></div>
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c2)"></div>공학</div><div class="dr-pct" style="color:var(--c2)">27.3%</div><div class="dr-cnt">611명</div></div>
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c3)"></div>예체능</div><div class="dr-pct" style="color:var(--c3)">23.3%</div><div class="dr-cnt">522명</div></div>
+        <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:var(--c4)"></div>인문사회</div><div class="dr-pct" style="color:var(--c4)">21.8%</div><div class="dr-cnt">489명</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== TAB 5 이용자분석 ====== -->
+<div id="tab-user" class="tab-pane">
+  <div class="ig">
+    <div class="ins"><div class="ins-ico">🔄</div><div class="ins-title">1인 평균 방문횟수</div><div class="ins-val" style="color:var(--c1)">3.66회</div><div class="ins-desc">8,206회 ÷ 2,241명</div></div>
+    <div class="ins"><div class="ins-ico">⭐</div><div class="ins-title">재방문율 (2회 이상)</div><div class="ins-val" style="color:var(--c3)">51.1%</div><div class="ins-desc">1,145명 재방문</div></div>
+    <div class="ins"><div class="ins-ico">🎓</div><div class="ins-title">최다 방문 입학연도</div><div class="ins-val" style="color:var(--c2)">2025년</div><div class="ins-desc">3,758회 · 신입생 주도</div></div>
+    <div class="ins"><div class="ins-ico">🏆</div><div class="ins-title">11회 이상 방문자</div><div class="ins-val" style="color:var(--c4)">161명</div><div class="ins-desc">충성 이용자 그룹</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-title">방문 빈도 분포</div><div class="card-sub">1인당 총 방문 횟수 구간 (전체 2,241명)</div><div class="cw"><canvas id="revisitBar"></canvas></div></div>
+    <div class="card"><div class="card-title">입학연도별 방문횟수</div><div class="card-sub">학번 앞 4자리 기준</div><div class="cw"><canvas id="yearBar"></canvas></div></div>
+  </div>
+  <div class="card full">
+    <div class="card-title">입학연도별 × 시설별 이용건수</div><div class="card-sub">학번 연도별 선호 시설 패턴</div>
+    <div class="legend"><div class="li"><div class="ld" style="background:var(--c1)"></div>인생네컷</div><div class="li"><div class="ld" style="background:var(--c2)"></div>코인노래방</div><div class="li"><div class="ld" style="background:var(--c3)"></div>탁구장</div><div class="li"><div class="ld" style="background:var(--c4)"></div>헬스장</div></div>
+    <div class="cw-md"><canvas id="yearFacilityBar"></canvas></div>
+  </div>
+</div>
+
+<!-- ====== TAB 6 학과별 상세 ====== -->
+<div id="tab-deptdetail" class="tab-pane">
+
+  <!-- KPI -->
+  <div class="ig" id="dd-kpi">
+    <div class="ins"><div class="ins-ico">🏫</div><div class="ins-title">표시 학과수</div><div class="ins-val" style="color:var(--c1)" id="dd-k1">48개</div><div class="ins-desc">원본 49개 (학과명 정규화)</div></div>
+    <div class="ins"><div class="ins-ico">🚶</div><div class="ins-title">방문횟수 합계</div><div class="ins-val" style="color:var(--c3)" id="dd-k2">8,206회</div><div class="ins-desc">이용자수 기준</div></div>
+    <div class="ins"><div class="ins-ico">🎯</div><div class="ins-title">이용건수 합계</div><div class="ins-val" style="color:var(--c2)" id="dd-k3">9,125건</div><div class="ins-desc">시설 이용 합계</div></div>
+    <div class="ins"><div class="ins-ico">👤</div><div class="ins-title">고유 학생수</div><div class="ins-val" style="color:var(--c4)" id="dd-k4">2,241명</div><div class="ins-desc">고유 학번 기준 (전체 고정값)</div></div>
+  </div>
+
+  <!-- 차트 2열 -->
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">학과별 이용건수 Top 20</div><div class="card-sub">시설별 구성 포함 (소계 내림차순)</div>
+      <div class="legend"><div class="li"><div class="ld" style="background:var(--c1)"></div>인생네컷</div><div class="li"><div class="ld" style="background:var(--c2)"></div>코인노래방</div><div class="li"><div class="ld" style="background:var(--c3)"></div>탁구장</div><div class="li"><div class="ld" style="background:var(--c4)"></div>헬스장</div></div>
+      <div style="position:relative;height:340px;"><canvas id="dd-bar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">학과별 주이용 시설 분포</div><div class="card-sub">학과 수 기준 — 가장 많이 이용한 시설</div>
+      <div style="position:relative;height:200px;"><canvas id="dd-donut"></canvas></div>
+      <div class="dr-rows" id="dd-donut-legend"></div>
+    </div>
+  </div>
+
+  <!-- 필터 바 -->
+  <div class="filter-bar">
+    <span style="font-size:12px;font-weight:700;color:var(--text2);">🔍 계열 필터</span>
+    <button class="filter-btn on" onclick="ddSetFilter('ALL',this)">전체</button>
+    <button class="filter-btn" onclick="ddSetFilter('자연과학',this)">자연과학</button>
+    <button class="filter-btn" onclick="ddSetFilter('공학',this)">공학</button>
+    <button class="filter-btn" onclick="ddSetFilter('예체능',this)">예체능</button>
+    <button class="filter-btn" onclick="ddSetFilter('인문사회',this)">인문사회</button>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+      <input class="search-box" type="text" placeholder="학과명 검색..." oninput="ddSetSearch(this.value)" id="dd-search">
+      <span style="font-size:11px;color:var(--muted);" id="dd-count">43개 학과</span>
+    </div>
+  </div>
+
+  <!-- 테이블 -->
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div style="overflow-x:auto;">
+      <table class="dd-table">
+        <thead id="dd-thead">
+          <tr>
+            <th style="width:44px;text-align:center;">순위</th>
+            <th onclick="ddSort('학과')" id="th-학과">학과 <span id="arr-학과">↕</span></th>
+            <th onclick="ddSort('계열')" id="th-계열">계열 <span id="arr-계열">↕</span></th>
+            <th style="text-align:right;" onclick="ddSort('방문수')" id="th-방문수">방문횟수 <span id="arr-방문수">↕</span></th>
+            <th style="text-align:right;" onclick="ddSort('학생수')" id="th-학생수" title="학과별 고유 학번 수 (학과간 중복 미제거)">학생수* <span id="arr-학생수">↕</span></th>
+            <th style="text-align:right;color:var(--c1);" onclick="ddSort('인생네컷')" id="th-인생네컷">📸 인생네컷 <span id="arr-인생네컷">↕</span></th>
+            <th style="text-align:right;color:var(--c2);" onclick="ddSort('코인노래방')" id="th-코인노래방">🎤 코인노래방 <span id="arr-코인노래방">↕</span></th>
+            <th style="text-align:right;color:var(--c3);" onclick="ddSort('탁구장')" id="th-탁구장">🏓 탁구장 <span id="arr-탁구장">↕</span></th>
+            <th style="text-align:right;color:var(--c4);" onclick="ddSort('헬스장')" id="th-헬스장">💪 헬스장 <span id="arr-헬스장">↕</span></th>
+            <th style="text-align:right;" onclick="ddSort('소계')" id="th-소계">소계 <span id="arr-소계">↓</span></th>
+            <th style="text-align:center;">주이용</th>
+            <th>시설 구성비</th>
+          </tr>
+        </thead>
+        <tbody id="dd-tbody"></tbody>
+        <tfoot id="dd-tfoot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /tab-deptdetail -->
+
+</div><!-- /content -->
+
+<script>
+// ═══════════════════════════════════════════════
+// 공통 데이터
+// ═══════════════════════════════════════════════
+const C={c1:'#2563eb',c2:'#f97316',c3:'#10b981',c4:'#f59e0b',
+  c1a:'rgba(37,99,235,.72)',c2a:'rgba(249,115,22,.72)',c3a:'rgba(16,185,129,.72)',c4a:'rgba(245,158,11,.72)',
+  grid:'rgba(226,232,242,.9)',text:'#94a3b8',text2:'#4b5a7a'};
+const tip={backgroundColor:'#1e2d52',borderColor:'#e2e8f2',borderWidth:1,titleColor:'#fff',bodyColor:'#94a3b8',padding:10};
+const baseOpts=(yLabel='')=>({responsive:true,maintainAspectRatio:true,
+  plugins:{legend:{display:false},tooltip:tip},
+  scales:{x:{grid:{color:C.grid},ticks:{color:C.text,font:{size:10,family:'Noto Sans KR'}}},
+          y:{grid:{color:C.grid},ticks:{color:C.text,font:{size:10}},title:{display:!!yLabel,text:yLabel,color:C.text,font:{size:10}}}}});
+
+const months=['3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+const days=['월요일','화요일','수요일','목요일','금요일'];
+const hours=['8시','9시','10시','11시','12시','13시','14시','15시','16시','17시'];
+const monthVisit=[632,1891,1137,762,96,101,1111,771,1027,678];
+const mF={인생:[231,489,214,107,1,11,109,80,111,69],코인:[253,778,469,359,24,32,465,341,492,398],탁구:[53,508,323,262,45,42,374,297,286,174],헬스:[179,430,266,143,27,25,234,99,220,105]};
+const dF={인생:[277,238,395,366,146],코인:[701,695,494,837,884],탁구:[337,346,513,850,318],헬스:[252,331,520,605,20]};
+const hourVisit=[1,173,286,787,1896,1705,969,946,1030,280];
+const hF={인생:[0,25,55,198,410,287,153,136,130,28],코인:[1,72,115,314,771,673,374,336,398,157],탁구:[0,60,93,197,486,543,307,326,348,65],헬스:[0,16,23,78,229,202,135,148,154,30]};
+const sNames=['자연과학','공학','예체능','인문사회'];
+const sVisit=[2403,2379,1931,1492],sStudents=[663,611,522,489];
+const sF={인생:[481,158,429,354],코인:[825,1108,979,699],탁구:[921,797,377,268],헬스:[517,538,331,342]};
+const yearLabels=['2020','2021','2022','2023','2024','2025'];
+const yearVisit=[173,702,806,912,1720,3758];
+const yF={인생:[19,92,105,148,281,777],코인:[71,282,328,385,687,1858],탁구:[48,192,219,232,470,1203],헬스:[35,136,154,147,282,920]};
+const timeDist=[1422,820,2905,1700,850,509];
+
+// ── TAB 1
+new Chart('monthlyBar',{type:'bar',data:{labels:months,datasets:[
+  {label:'인생네컷',data:mF.인생,backgroundColor:C.c1a,stack:'s'},{label:'코인노래방',data:mF.코인,backgroundColor:C.c2a,stack:'s'},
+  {label:'탁구장',data:mF.탁구,backgroundColor:C.c3a,stack:'s'},{label:'헬스장',data:mF.헬스,backgroundColor:C.c4a,stack:'s'},
+]},options:baseOpts('건')});
+new Chart('facilityDonut',{type:'doughnut',data:{labels:['코인노래방','탁구장','헬스장','인생네컷'],datasets:[{data:[3611,2364,1728,1422],backgroundColor:[C.c2a,C.c3a,C.c4a,C.c1a],borderColor:[C.c2,C.c3,C.c4,C.c1],borderWidth:2}]},options:{responsive:true,cutout:'65%',plugins:{legend:{display:false},tooltip:tip}}});
+new Chart('dailyBar',{type:'bar',data:{labels:days,datasets:[
+  {label:'인생네컷',data:dF.인생,backgroundColor:C.c1a,stack:'s'},{label:'코인노래방',data:dF.코인,backgroundColor:C.c2a,stack:'s'},
+  {label:'탁구장',data:dF.탁구,backgroundColor:C.c3a,stack:'s'},{label:'헬스장',data:dF.헬스,backgroundColor:C.c4a,stack:'s'},
+]},options:baseOpts('건')});
+new Chart('monthlyLine',{type:'line',data:{labels:months,datasets:[{label:'방문횟수',data:monthVisit,borderColor:C.c1,backgroundColor:'rgba(37,99,235,.1)',fill:true,tension:.4,pointBackgroundColor:C.c1,pointRadius:4,pointHoverRadius:6}]},options:baseOpts('회')});
+
+// ── TAB 2
+new Chart('avgTimeBar',{type:'bar',data:{labels:['인생네컷','코인노래방','탁구장','헬스장'],datasets:[{data:[18.4,36.6,40.0,58.0],backgroundColor:[C.c1a,C.c2a,C.c3a,C.c4a],borderColor:[C.c1,C.c2,C.c3,C.c4],borderWidth:2,borderRadius:8}]},options:{...baseOpts('분'),scales:{...baseOpts('분').scales,y:{...baseOpts('분').scales.y,min:0,max:70}}}});
+new Chart('facilityMonthLine',{type:'line',data:{labels:months,datasets:[
+  {label:'인생네컷',data:mF.인생,borderColor:C.c1,backgroundColor:'transparent',tension:.4,pointRadius:3},
+  {label:'코인노래방',data:mF.코인,borderColor:C.c2,backgroundColor:'transparent',tension:.4,pointRadius:3},
+  {label:'탁구장',data:mF.탁구,borderColor:C.c3,backgroundColor:'transparent',tension:.4,pointRadius:3},
+  {label:'헬스장',data:mF.헬스,borderColor:C.c4,backgroundColor:'transparent',tension:.4,pointRadius:3},
+]},options:baseOpts('건')});
+new Chart('multiDonut',{type:'doughnut',data:{labels:['1개','2개','3개','4개'],datasets:[{data:[7347,798,58,2],backgroundColor:[C.c1a,C.c2a,C.c3a,C.c4a],borderColor:[C.c1,C.c2,C.c3,C.c4],borderWidth:2}]},options:{responsive:true,cutout:'60%',plugins:{legend:{display:false},tooltip:tip}}});
+new Chart('comboBar',{type:'bar',data:{labels:['인생+코인','코인+탁구','인생+탁구','코인+헬스','탁구+헬스','인생+헬스','인생+코인+탁구','인생+코인+헬스'],datasets:[{data:[288,242,105,100,42,21,34,15],backgroundColor:[C.c1a,C.c2a,C.c3a,C.c4a,'rgba(139,92,246,.7)','rgba(239,68,68,.7)',C.c1a,C.c2a],borderRadius:5}]},options:{...baseOpts('건'),indexAxis:'y',scales:{x:{grid:{color:C.grid},ticks:{color:C.text,font:{size:10}}},y:{grid:{color:C.grid},ticks:{color:C.text2,font:{size:10}}}}}});
+new Chart('hourFacilityBar',{type:'bar',data:{labels:hours,datasets:[
+  {label:'인생네컷',data:hF.인생,backgroundColor:C.c1a,stack:'s'},{label:'코인노래방',data:hF.코인,backgroundColor:C.c2a,stack:'s'},
+  {label:'탁구장',data:hF.탁구,backgroundColor:C.c3a,stack:'s'},{label:'헬스장',data:hF.헬스,backgroundColor:C.c4a,stack:'s'},
+]},options:baseOpts('건')});
+
+// ── TAB 3
+new Chart('dayStacked',{type:'bar',data:{labels:days,datasets:[
+  {label:'인생네컷',data:dF.인생,backgroundColor:C.c1a,stack:'s'},{label:'코인노래방',data:dF.코인,backgroundColor:C.c2a,stack:'s'},
+  {label:'탁구장',data:dF.탁구,backgroundColor:C.c3a,stack:'s'},{label:'헬스장',data:dF.헬스,backgroundColor:C.c4a,stack:'s'},
+]},options:baseOpts('건')});
+new Chart('hourLine',{type:'line',data:{labels:hours,datasets:[{label:'방문횟수',data:hourVisit,borderColor:C.c2,backgroundColor:'rgba(249,115,22,.1)',fill:true,tension:.4,pointBackgroundColor:C.c2,pointRadius:5,pointHoverRadius:7}]},options:baseOpts('회')});
+new Chart('semesterDonut',{type:'doughnut',data:{labels:['1학기(3~6월)','2학기(9~12월)','방학(7~8월)'],datasets:[{data:[4422,3587,197],backgroundColor:[C.c1a,C.c3a,'rgba(148,163,184,.45)'],borderColor:[C.c1,C.c3,'#94a3b8'],borderWidth:2}]},options:{responsive:true,cutout:'60%',plugins:{legend:{display:false},tooltip:tip}}});
+new Chart('timeDist',{type:'bar',data:{labels:['15분이하','16~30분','31~60분','61~90분','91~120분','120분초과'],datasets:[{data:timeDist,backgroundColor:['rgba(37,99,235,.35)','rgba(37,99,235,.5)','rgba(37,99,235,.75)','rgba(249,115,22,.7)','rgba(245,158,11,.7)','rgba(16,185,129,.7)'],borderRadius:6}]},options:baseOpts('회')});
+
+// ── TAB 4 dept list
+const deptRaw=[['유한바이오제약전공',547,595],['스포츠재활전공',504,546],['보건의료행정학과',434,503],['방송영상전공',389,421],['게임콘텐츠전공',387,418],['호텔조리전공',354,384],['패션디자인전공',354,381],['사회복지전공',354,388],['카페베이커리전공',333,357],['컴퓨터소프트웨어전공',251,268],['컴퓨터정보통신전공',261,288],['방송연예전공',247,265],['실내건축전공',181,206],['IT비즈니스전공',137,152],['인공지능전공',63,68],['유한생명화공전공',67,76],['전기공학전공',184,214],['식품영양학과',188,212],['소방설비안전전공',277,303],['항공서비스학과',151,176],['일본비즈니스전공',159,165],['응급구조과',127,156],['광고미디어전공',135,155],['방송문예창작전공',128,135],['산업안전전공',97,106],['작업치료과',79,92],['전자공학전공',89,90],['뷰티화장품전공',69,81],['자유전공학과',68,76],['산업디자인전공',223,243]];
+deptRaw.sort((a,b)=>b[1]-a[1]);
+const maxV=deptRaw[0][1];
+const deptEl=document.getElementById('deptList');
+deptRaw.forEach(([n,v,u],i)=>{
+  deptEl.innerHTML+=`<div class="dept-row-item"><div class="dr-rank">${String(i+1).padStart(2,'0')}</div><div class="dr-name">${n}</div><div class="dr-bar"><div class="dr-bar-fill" style="width:${(v/maxV*100).toFixed(1)}%"></div></div><div class="dr-v">${v}</div><div class="dr-u">${u}</div></div>`;
+});
+new Chart('seriesBar',{type:'bar',data:{labels:sNames,datasets:[{data:sVisit,backgroundColor:[C.c1a,C.c2a,C.c3a,C.c4a],borderColor:[C.c1,C.c2,C.c3,C.c4],borderWidth:2,borderRadius:8}]},options:baseOpts('회')});
+new Chart('seriesStacked',{type:'bar',data:{labels:sNames,datasets:[
+  {label:'인생네컷',data:sF.인생,backgroundColor:C.c1a,stack:'s'},{label:'코인노래방',data:sF.코인,backgroundColor:C.c2a,stack:'s'},
+  {label:'탁구장',data:sF.탁구,backgroundColor:C.c3a,stack:'s'},{label:'헬스장',data:sF.헬스,backgroundColor:C.c4a,stack:'s'},
+]},options:baseOpts('건')});
+new Chart('seriesUserDonut',{type:'doughnut',data:{labels:sNames,datasets:[{data:sStudents,backgroundColor:[C.c1a,C.c2a,C.c3a,C.c4a],borderColor:[C.c1,C.c2,C.c3,C.c4],borderWidth:2}]},options:{responsive:true,cutout:'60%',plugins:{legend:{display:false},tooltip:tip}}});
+
+// ── TAB 5
+new Chart('revisitBar',{type:'bar',data:{labels:['1회 방문','2~5회','6~10회','11회 이상'],datasets:[{data:[1096,788,196,161],backgroundColor:['rgba(148,163,184,.5)',C.c1a,C.c3a,C.c2a],borderColor:['#94a3b8',C.c1,C.c3,C.c2],borderWidth:2,borderRadius:8}]},options:baseOpts('명')});
+new Chart('yearBar',{type:'bar',data:{labels:yearLabels,datasets:[{label:'방문횟수',data:yearVisit,backgroundColor:['rgba(148,163,184,.4)','rgba(148,163,184,.5)','rgba(37,99,235,.45)','rgba(37,99,235,.6)','rgba(37,99,235,.78)','rgba(249,115,22,.8)'],borderColor:['#94a3b8','#94a3b8',C.c1,C.c1,C.c1,C.c2],borderWidth:2,borderRadius:8}]},options:baseOpts('회')});
+new Chart('yearFacilityBar',{type:'bar',data:{labels:yearLabels,datasets:[
+  {label:'인생네컷',data:yF.인생,backgroundColor:C.c1a,stack:'s'},{label:'코인노래방',data:yF.코인,backgroundColor:C.c2a,stack:'s'},
+  {label:'탁구장',data:yF.탁구,backgroundColor:C.c3a,stack:'s'},{label:'헬스장',data:yF.헬스,backgroundColor:C.c4a,stack:'s'},
+]},options:baseOpts('건')});
+
+// ═══════════════════════════════════════════════
+// TAB 6 — 학과별 상세
+// ═══════════════════════════════════════════════
+// CSV 정확 집계 — 방문수합계=8,206 / 소계합계=9,125 / 고유학생=2,241 / 학과=49개(원본)
+// IT비즈니스전공: 'IT'+'it' 통합(152회), 누락 5개 학과 추가
+const DEPT = [
+  {학과:"유한바이오제약전공",       계열:"자연과학", 방문수:547, 학생수:142, 인생네컷:101, 코인노래방:157, 탁구장:271, 헬스장: 66, 소계:595, 주이용:"탁구장"},
+  {학과:"스포츠재활전공",           계열:"자연과학", 방문수:504, 학생수:103, 인생네컷: 27, 코인노래방:140, 탁구장:269, 헬스장:110, 소계:546, 주이용:"탁구장"},
+  {학과:"보건의료행정학과",         계열:"인문사회", 방문수:434, 학생수:132, 인생네컷:103, 코인노래방:155, 탁구장: 65, 헬스장:180, 소계:503, 주이용:"헬스장"},
+  {학과:"카페베이커리전공",         계열:"자연과학", 방문수:333, 학생수: 80, 인생네컷:114, 코인노래방:162, 탁구장: 98, 헬스장: 84, 소계:458, 주이용:"코인노래방"},
+  {학과:"패션디자인전공",           계열:"예체능",   방문수:384, 학생수:117, 인생네컷:188, 코인노래방:140, 탁구장: 44, 헬스장: 62, 소계:434, 주이용:"인생네컷"},
+  {학과:"방송영상전공",             계열:"예체능",   방문수:389, 학생수: 81, 인생네컷: 22, 코인노래방:194, 탁구장:192, 헬스장: 13, 소계:421, 주이용:"코인노래방"},
+  {학과:"게임콘텐츠전공",           계열:"공학",     방문수:387, 학생수: 87, 인생네컷: 24, 코인노래방:237, 탁구장: 70, 헬스장: 87, 소계:418, 주이용:"코인노래방"},
+  {학과:"사회복지전공",             계열:"인문사회", 방문수:354, 학생수:109, 인생네컷: 92, 코인노래방:164, 탁구장: 66, 헬스장: 63, 소계:385, 주이용:"코인노래방"},
+  {학과:"기계시스템전공",           계열:"공학",     방문수:324, 학생수: 80, 인생네컷: 20, 코인노래방:120, 탁구장:153, 헬스장: 64, 소계:357, 주이용:"탁구장"},
+  {학과:"호텔조리전공",             계열:"자연과학", 방문수:309, 학생수: 83, 인생네컷: 10, 코인노래방:104, 탁구장:100, 헬스장:118, 소계:332, 주이용:"헬스장"},
+  {학과:"소방설비안전전공",         계열:"공학",     방문수:277, 학생수: 65, 인생네컷: 12, 코인노래방: 72, 탁구장:142, 헬스장: 77, 소계:303, 주이용:"탁구장"},
+  {학과:"컴퓨터정보통신전공",       계열:"공학",     방문수:261, 학생수: 54, 인생네컷:  5, 코인노래방: 77, 탁구장:176, 헬스장: 30, 소계:288, 주이용:"탁구장"},
+  {학과:"컴퓨터소프트웨어전공",     계열:"공학",     방문수:251, 학생수: 77, 인생네컷: 10, 코인노래방:121, 탁구장: 81, 헬스장: 56, 소계:268, 주이용:"코인노래방"},
+  {학과:"방송연예전공",             계열:"예체능",   방문수:247, 학생수: 55, 인생네컷: 82, 코인노래방:132, 탁구장: 23, 헬스장: 28, 소계:265, 주이용:"코인노래방"},
+  {학과:"애니메이션웹툰전공",       계열:"예체능",   방문수:263, 학생수: 54, 인생네컷:  3, 코인노래방:125, 탁구장:  9, 헬스장:128, 소계:265, 주이용:"헬스장"},
+  {학과:"산업디자인전공",           계열:"공학",     방문수:223, 학생수: 65, 인생네컷: 30, 코인노래방:143, 탁구장: 58, 헬스장: 12, 소계:243, 주이용:"코인노래방"},
+  {학과:"시각디자인전공",           계열:"예체능",   방문수:194, 학생수: 63, 인생네컷: 43, 코인노래방:112, 탁구장: 16, 헬스장: 53, 소계:224, 주이용:"코인노래방"},
+  {학과:"전기공학전공",             계열:"공학",     방문수:184, 학생수: 67, 인생네컷: 21, 코인노래방:104, 탁구장: 24, 헬스장: 65, 소계:214, 주이용:"코인노래방"},
+  {학과:"식품영양학과",             계열:"자연과학", 방문수:188, 학생수: 69, 인생네컷: 70, 코인노래방: 48, 탁구장: 54, 헬스장: 40, 소계:212, 주이용:"인생네컷"},
+  {학과:"실내건축전공",             계열:"예체능",   방문수:181, 학생수: 85, 인생네컷: 34, 코인노래방:109, 탁구장: 39, 헬스장: 24, 소계:206, 주이용:"코인노래방"},
+  {학과:"호텔관광전공",             계열:"인문사회", 방문수:192, 학생수: 63, 인생네컷: 18, 코인노래방:112, 탁구장: 50, 헬스장: 25, 소계:205, 주이용:"코인노래방"},
+  {학과:"항공서비스학과",           계열:"인문사회", 방문수:151, 학생수: 50, 인생네컷: 65, 코인노래방: 46, 탁구장: 26, 헬스장: 39, 소계:176, 주이용:"인생네컷"},
+  {학과:"IT비즈니스전공",           계열:"공학",     방문수:152, 학생수: 32, 인생네컷:  5, 코인노래방: 80, 탁구장: 20, 헬스장: 62, 소계:167, 주이용:"코인노래방"},
+  {학과:"일본비즈니스전공",         계열:"인문사회", 방문수:159, 학생수: 43, 인생네컷:  9, 코인노래방:126, 탁구장: 26, 헬스장:  4, 소계:165, 주이용:"코인노래방"},
+  {학과:"응급구조과",               계열:"자연과학", 방문수:127, 학생수: 33, 인생네컷: 16, 코인노래방: 54, 탁구장: 37, 헬스장: 49, 소계:156, 주이용:"코인노래방"},
+  {학과:"광고미디어전공",           계열:"예체능",   방문수:135, 학생수: 44, 인생네컷: 27, 코인노래방: 77, 탁구장: 48, 헬스장:  3, 소계:155, 주이용:"코인노래방"},
+  {학과:"방송문예창작전공",         계열:"예체능",   방문수:128, 학생수: 36, 인생네컷: 22, 코인노래방: 90, 탁구장:  3, 헬스장: 20, 소계:135, 주이용:"코인노래방"},
+  {학과:"산업안전전공",             계열:"공학",     방문수: 97, 학생수: 39, 인생네컷:  6, 코인노래방: 50, 탁구장: 25, 헬스장: 25, 소계:106, 주이용:"코인노래방"},
+  {학과:"작업치료과",               계열:"자연과학", 방문수: 79, 학생수: 31, 인생네컷: 24, 코인노래방: 24, 탁구장: 31, 헬스장: 13, 소계: 92, 주이용:"탁구장"},
+  {학과:"전자공학전공",             계열:"공학",     방문수: 89, 학생수: 26, 인생네컷:  3, 코인노래방: 69, 탁구장: 11, 헬스장:  7, 소계: 90, 주이용:"코인노래방"},
+  {학과:"뷰티화장품전공",           계열:"자연과학", 방문수: 69, 학생수: 22, 인생네컷: 38, 코인노래방: 41, 탁구장:  0, 헬스장:  2, 소계: 81, 주이용:"코인노래방"},
+  {학과:"자유전공학과",             계열:"공학",     방문수: 68, 학생수: 24, 인생네컷: 12, 코인노래방: 22, 탁구장: 28, 헬스장: 14, 소계: 76, 주이용:"탁구장"},
+  {학과:"유한생명화공전공",         계열:"자연과학", 방문수: 67, 학생수: 37, 인생네컷:  8, 코인노래방: 24, 탁구장: 39, 헬스장:  5, 소계: 76, 주이용:"탁구장"},
+  {학과:"피부메이크업전공",         계열:"자연과학", 방문수: 62, 학생수: 32, 인생네컷: 46, 코인노래방: 24, 탁구장:  1, 헬스장:  3, 소계: 74, 주이용:"인생네컷"},
+  {학과:"인공지능전공",             계열:"공학",     방문수: 63, 학생수: 25, 인생네컷: 10, 코인노래방: 12, 탁구장:  9, 헬스장: 37, 소계: 68, 주이용:"헬스장"},
+  {학과:"세무회계전공",             계열:"인문사회", 방문수: 53, 학생수: 30, 인생네컷: 21, 코인노래방: 23, 탁구장:  4, 헬스장: 13, 소계: 61, 주이용:"코인노래방"},
+  {학과:"경영정보전공",             계열:"인문사회", 방문수: 53, 학생수: 25, 인생네컷:  7, 코인노래방: 31, 탁구장: 18, 헬스장:  4, 소계: 60, 주이용:"코인노래방"},
+  {학과:"반려동물보건학과",         계열:"자연과학", 방문수: 57, 학생수: 35, 인생네컷: 13, 코인노래방: 24, 탁구장: 14, 헬스장:  8, 소계: 59, 주이용:"코인노래방"},
+  {학과:"사회복지전공(심화)",       계열:"인문사회", 방문수: 36, 학생수: 15, 인생네컷: 26, 코인노래방: 10, 탁구장:  2, 헬스장:  4, 소계: 42, 주이용:"인생네컷"},
+  {학과:"반려동물산업전공",         계열:"자연과학", 방문수: 38, 학생수: 19, 인생네컷: 10, 코인노래방: 21, 탁구장:  4, 헬스장:  4, 소계: 39, 주이용:"코인노래방"},
+  {학과:"아동보육전공",             계열:"인문사회", 방문수: 29, 학생수: 15, 인생네컷:  7, 코인노래방: 21, 탁구장:  0, 헬스장:  4, 소계: 32, 주이용:"코인노래방"},
+  {학과:"항공경영전공",             계열:"인문사회", 방문수: 28, 학생수: 16, 인생네컷:  4, 코인노래방: 11, 탁구장: 10, 헬스장:  6, 소계: 31, 주이용:"코인노래방"},
+  {학과:"유한바이오제약전공(심화)", 계열:"자연과학", 방문수: 23, 학생수:  9, 인생네컷:  4, 코인노래방:  2, 탁구장:  3, 헬스장: 15, 소계: 24, 주이용:"헬스장"},
+  {학과:"실내건축전공(전공심화)",   계열:"예체능",   방문수:  8, 학생수:  5, 인생네컷:  6, 코인노래방:  0, 탁구장:  3, 헬스장:  0, 소계:  9, 주이용:"인생네컷"},
+  {학과:"기계시스템전공(심화)",     계열:"공학",     방문수:  4, 학생수:  2, 인생네컷:  0, 코인노래방:  1, 탁구장:  1, 헬스장:  2, 소계:  4, 주이용:"헬스장"},
+  {학과:"보건의료행정학과(심화)",   계열:"인문사회", 방문수:  3, 학생수:  3, 인생네컷:  2, 코인노래방:  0, 탁구장:  1, 헬스장:  0, 소계:  3, 주이용:"인생네컷"},
+  {학과:"패션디자인전공(심화)",     계열:"예체능",   방문수:  2, 학생수:  2, 인생네컷:  2, 코인노래방:  0, 탁구장:  0, 헬스장:  0, 소계:  2, 주이용:"인생네컷"},
+];
+
+const SC={'자연과학':{bg:'rgba(16,185,129,.12)',bd:'#10b981',tc:'#065f46'},'공학':{bg:'rgba(37,99,235,.12)',bd:'#2563eb',tc:'#1e40af'},'예체능':{bg:'rgba(249,115,22,.12)',bd:'#f97316',tc:'#9a3412'},'인문사회':{bg:'rgba(139,92,246,.12)',bd:'#8b5cf6',tc:'#5b21b6'}};
+const FC={'인생네컷':'#2563eb','코인노래방':'#f97316','탁구장':'#10b981','헬스장':'#f59e0b'};
+const FE={'인생네컷':'📸','코인노래방':'🎤','탁구장':'🏓','헬스장':'💪'};
+
+let ddFilter='ALL', ddSearch='', ddSortKey='소계', ddSortAsc=false;
+let ddBarChart=null, ddDonutChart=null;
+
+function ddGetFiltered(){
+  return DEPT.filter(d=>(ddFilter==='ALL'||d.계열===ddFilter)&&d.학과.includes(ddSearch));
+}
+
+function ddRender(){
+  let data=ddGetFiltered();
+  data.sort((a,b)=>{
+    const va=a[ddSortKey],vb=b[ddSortKey];
+    return ddSortAsc?(typeof va==='number'?va-vb:va.localeCompare(vb)):(typeof va==='number'?vb-va:vb.localeCompare(va));
+  });
+
+  const tv=data.reduce((s,d)=>s+d.방문수,0);
+  const tu=data.reduce((s,d)=>s+d.소계,0);
+  const ts=2241; // 고유 학번 unique 기준 (학과 중복 제거 후 전체값)
+  document.getElementById('dd-k1').textContent=data.length+'개 / 전체 '+DEPT.length+'개';
+  document.getElementById('dd-k2').textContent=tv.toLocaleString()+'회';
+  document.getElementById('dd-k3').textContent=tu.toLocaleString()+'건';
+  document.getElementById('dd-k4').textContent='2,241명';
+  document.getElementById('dd-count').textContent=data.length+'개 학과 표시 중';
+
+  // 정렬 화살표
+  ['학과','계열','방문수','학생수','인생네컷','코인노래방','탁구장','헬스장','소계'].forEach(k=>{
+    const el=document.getElementById('arr-'+k);
+    if(el) el.textContent=ddSortKey===k?(ddSortAsc?'↑':'↓'):'↕';
+    const th=document.getElementById('th-'+k);
+    if(th){th.classList.toggle('sort-active',ddSortKey===k);}
+  });
+
+  // 상단 차트 top20
+  const top20=[...DEPT].sort((a,b)=>b.소계-a.소계).slice(0,20);
+  if(ddBarChart) ddBarChart.destroy();
+  ddBarChart=new Chart(document.getElementById('dd-bar'),{type:'bar',
+    data:{labels:top20.map(d=>d.학과),datasets:[
+      {label:'인생네컷',data:top20.map(d=>d.인생네컷),backgroundColor:C.c1a,stack:'s'},
+      {label:'코인노래방',data:top20.map(d=>d.코인노래방),backgroundColor:C.c2a,stack:'s'},
+      {label:'탁구장',data:top20.map(d=>d.탁구장),backgroundColor:C.c3a,stack:'s'},
+      {label:'헬스장',data:top20.map(d=>d.헬스장),backgroundColor:C.c4a,stack:'s'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:tip},
+      scales:{x:{grid:{color:C.grid},ticks:{color:C.text,font:{size:10}}},y:{grid:{color:C.grid},ticks:{color:C.text2,font:{size:10,family:'Noto Sans KR'}}}}}
+  });
+
+  // 도넛
+  const fc={'인생네컷':0,'코인노래방':0,'탁구장':0,'헬스장':0};
+  DEPT.forEach(d=>{if(fc[d.주이용]!==undefined)fc[d.주이용]++;});
+  if(ddDonutChart) ddDonutChart.destroy();
+  ddDonutChart=new Chart(document.getElementById('dd-donut'),{type:'doughnut',
+    data:{labels:Object.keys(fc),datasets:[{data:Object.values(fc),backgroundColor:[C.c1a,C.c2a,C.c3a,C.c4a],borderColor:[C.c1,C.c2,C.c3,C.c4],borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:tip}}
+  });
+  const fctot=Object.values(fc).reduce((a,b)=>a+b,0);
+  document.getElementById('dd-donut-legend').innerHTML=Object.entries(fc).map(([k,v])=>`
+    <div class="dr-row"><div class="dr-lbl"><div class="dr-dot" style="background:${FC[k]}"></div>${FE[k]} ${k}</div>
+    <div class="dr-pct" style="color:${FC[k]}">${fctot?Math.round(v/fctot*100):0}%</div><div class="dr-cnt">${v}개 학과</div></div>`).join('');
+
+  // 테이블
+  const maxS=Math.max(...data.map(d=>d.소계));
+  const tbody=document.getElementById('dd-tbody');
+  tbody.innerHTML=data.map((d,i)=>{
+    const sc=SC[d.계열]||{bg:'rgba(148,163,184,.12)',bd:'#94a3b8',tc:'#475569'};
+    const fc2=FC[d.주이용]||'#94a3b8';
+    const fe2=FE[d.주이용]||'—';
+    const tot=d.소계||1;
+    const rankBadge=i<3?`<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:${['#f59e0b','#94a3b8','#b45309'][i]};color:#fff;font-size:10px;font-weight:800;">${i+1}</span>`:`<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">${String(i+1).padStart(2,'0')}</span>`;
+    return `<tr>
+      <td style="text-align:center;">${rankBadge}</td>
+      <td style="font-weight:600;color:var(--text);">${d.학과}</td>
+      <td><span class="dd-badge" style="background:${sc.bg};color:${sc.tc};border:1px solid ${sc.bd};">${d.계열}</span></td>
+      <td class="dd-num" style="color:var(--text2);">${d.방문수.toLocaleString()}</td>
+      <td class="dd-num" style="color:var(--muted);">${d.학생수}</td>
+      <td class="dd-num" style="color:var(--c1);">${d.인생네컷}</td>
+      <td class="dd-num" style="color:var(--c2);">${d.코인노래방}</td>
+      <td class="dd-num" style="color:var(--c3);">${d.탁구장}</td>
+      <td class="dd-num" style="color:var(--c4);">${d.헬스장}</td>
+      <td style="text-align:right;">
+        <div class="dd-prog-wrap" style="justify-content:flex-end;">
+          <div class="dd-prog"><div class="dd-prog-fill" style="width:${Math.round(d.소계/maxS*100)}%;"></div></div>
+          <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:var(--text);min-width:34px;text-align:right;">${d.소계.toLocaleString()}</span>
+        </div>
+      </td>
+      <td style="text-align:center;"><span class="dd-fac-badge" style="background:${fc2}22;color:${fc2};border:1px solid ${fc2}44;">${fe2} ${d.주이용}</span></td>
+      <td>
+        <div class="dd-ratio-bar">
+          <div style="flex:${d.인생네컷||0};background:var(--c1);opacity:.8;" title="인생네컷 ${Math.round(d.인생네컷/tot*100)}%"></div>
+          <div style="flex:${d.코인노래방||0};background:var(--c2);opacity:.8;" title="코인노래방 ${Math.round(d.코인노래방/tot*100)}%"></div>
+          <div style="flex:${d.탁구장||0};background:var(--c3);opacity:.8;" title="탁구장 ${Math.round(d.탁구장/tot*100)}%"></div>
+          <div style="flex:${d.헬스장||0};background:var(--c4);opacity:.8;" title="헬스장 ${Math.round(d.헬스장/tot*100)}%"></div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // tfoot
+  document.getElementById('dd-tfoot').innerHTML=`<tr>
+    <td colspan="3" style="padding:10px 12px;">합 계 (${data.length}개 학과)</td>
+    <td class="dd-num">${tv.toLocaleString()}</td>
+    <td class="dd-num" title="전체 고유학번 기준 2,241명 (학과 중복 포함 합산값 아님)">${ddFilter==="ALL"?"2,241":"*"}</td>
+    <td class="dd-num">${data.reduce((s,d)=>s+d.인생네컷,0).toLocaleString()}</td>
+    <td class="dd-num">${data.reduce((s,d)=>s+d.코인노래방,0).toLocaleString()}</td>
+    <td class="dd-num">${data.reduce((s,d)=>s+d.탁구장,0).toLocaleString()}</td>
+    <td class="dd-num">${data.reduce((s,d)=>s+d.헬스장,0).toLocaleString()}</td>
+    <td class="dd-num">${tu.toLocaleString()}</td>
+    <td colspan="2"></td>
+  </tr>`;
+}
+
+function ddSort(key){
+  if(ddSortKey===key) ddSortAsc=!ddSortAsc;
+  else{ddSortKey=key;ddSortAsc=false;}
+  ddRender();
+}
+function ddSetFilter(val,btn){
+  ddFilter=val;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  ddRender();
+}
+function ddSetSearch(val){ddSearch=val;ddRender();}
+
+// ═══════════════════════════════════════════════
+// 탭 전환
+// ═══════════════════════════════════════════════
+let ddInitialized=false;
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  btn.classList.add('active');
+  if(tab==='deptdetail'&&!ddInitialized){
+    ddInitialized=true;
+    setTimeout(ddRender,50); // DOM 렌더 후 차트 생성
+  }
+}
+
+// ═══════════════════════════════════════════════
+// 공유 · 인쇄 기능
+// ═══════════════════════════════════════════════
+function handleShare(){
+  const url = window.location.href;
+  document.getElementById('shareUrlInput').value = url;
+  document.getElementById('shareModal').classList.add('open');
+}
+function closeShare(){
+  document.getElementById('shareModal').classList.remove('open');
+}
+function copyUrl(){
+  const input = document.getElementById('shareUrlInput');
+  input.select();
+  input.setSelectionRange(0,99999);
+  const btn = document.getElementById('shareCopyBtn');
+  try{
+    navigator.clipboard.writeText(input.value).then(()=>{
+      btn.textContent='✓ 복사됨'; btn.classList.add('copied');
+      setTimeout(()=>{btn.textContent='복사';btn.classList.remove('copied');},2000);
+    });
+  }catch(e){
+    document.execCommand('copy');
+    btn.textContent='✓ 복사됨'; btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='복사';btn.classList.remove('copied');},2000);
+  }
+}
+function shareViaEmail(){
+  const url = window.location.href;
+  const sub = encodeURIComponent('유한대학교 웰니스 스테이션 2025 이용 현황 대시보드');
+  const body = encodeURIComponent('안녕하세요.\n\n2025학년도 웰니스 스테이션 이용 현황 대시보드를 공유드립니다.\n\n▶ 대시보드 링크: ' + url + '\n\n브라우저에서 바로 열람하실 수 있습니다.');
+  window.open('mailto:?subject='+sub+'&body='+body);
+  closeShare();
+}
+function shareViaKakao(){
+  copyUrl();
+  alert('링크가 클립보드에 복사되었습니다.\n카카오톡을 열어 붙여넣기(Ctrl+V)로 전송하세요.');
+  closeShare();
+}
+function downloadHtml(){
+  const blob = new Blob([document.documentElement.outerHTML], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'wellness_dashboard_2025.html';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  closeShare();
+}
+function printDashboard(){
+  // 현재 활성 탭 제목 가져오기
+  const activeBtn = document.querySelector('.tab-btn.active');
+  const tabTitle = activeBtn ? activeBtn.textContent.trim() : '';
+  const ph = document.getElementById('printHeaderEl');
+  if(ph) ph.querySelector('p').textContent =
+    '현재 탭: ' + tabTitle + '  |  기준일: 2025.12.31  |  총이용건수 9,125건  |  방문횟수 8,206회  |  고유학생 2,241명';
+  window.print();
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeShare(); });
+
+</script>
+
+<!-- ── 공유 모달 -->
+<div id="shareModal" class="share-modal" onclick="if(event.target===this)closeShare()">
+  <div class="share-box">
+    <div class="share-title">📤 대시보드 공유</div>
+    <div class="share-desc">아래 방법으로 링크를 받은 누구나 이 대시보드를 열람할 수 있습니다.</div>
+
+    <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;">현재 페이지 URL</div>
+    <div class="share-url-row">
+      <input id="shareUrlInput" class="share-url-input" readonly>
+      <button id="shareCopyBtn" class="share-copy-btn" onclick="copyUrl()">복사</button>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;">공유 방법 선택</div>
+    <div class="share-methods">
+      <div class="share-method" onclick="shareViaEmail()">
+        <div class="share-method-ico">📧</div>
+        <div class="share-method-lbl">이메일</div>
+        <div class="share-method-sub">메일 앱 열기</div>
+      </div>
+      <div class="share-method" onclick="shareViaKakao()">
+        <div class="share-method-ico">💬</div>
+        <div class="share-method-lbl">카카오톡</div>
+        <div class="share-method-sub">링크 복사 후 전송</div>
+      </div>
+      <div class="share-method" onclick="downloadHtml()">
+        <div class="share-method-ico">💾</div>
+        <div class="share-method-lbl">HTML 다운로드</div>
+        <div class="share-method-sub">파일로 저장·전송</div>
+      </div>
+    </div>
+
+    <div class="share-notice">
+      <b>📌 공유 안내</b><br>
+      • <b>URL 공유</b> — 파일을 웹 서버(GitHub Pages, Netlify 등)에 업로드하면 URL 하나로 전 직원이 접근 가능합니다.<br>
+      • <b>HTML 파일 공유</b> — 다운로드한 파일을 이메일·카카오톡·메신저로 직접 전송하면 수신자가 브라우저에서 바로 열람 가능합니다.<br>
+      • 별도 계정·설치 없이 <b>인터넷 브라우저만</b> 있으면 됩니다.
+    </div>
+    <button class="share-close" onclick="closeShare()">닫기</button>
+  </div>
+</div>
+
+<!-- ── 인쇄용 헤더 (화면에는 숨김) -->
+<div class="print-header" id="printHeaderEl">
+  <h2>YUHAN WELLNESS STATION · 2025학년도 이용 현황 분석 대시보드</h2>
+  <p>기준일: 2025.12.31 &nbsp;|&nbsp; 총이용건수 9,125건 &nbsp;|&nbsp; 방문횟수 8,206회 &nbsp;|&nbsp; 고유학생 2,241명 &nbsp;|&nbsp; 참여학과 49개</p>
+</div>
+
+</body>
+</html>
