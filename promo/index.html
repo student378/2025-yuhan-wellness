@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>유한대학교 홍보 모션</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#071634; --navy2:#0c2458; --blue:#1f5fe0; --sky:#5cc8ff;
+  --mint:#3ee0a8; --gold:#f6c453; --white:#ffffff; --mute:#9fb3d9;
+  --ui-bg:rgba(7,22,52,.72); --ui-fg:#e8efff;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){ --page:#dfe6f3; }
+}
+:root{ --page:#02070f; }
+:root[data-theme="light"]{ --page:#dfe6f3; }
+:root[data-theme="dark"]{ --page:#02070f; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--page);overflow:hidden}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--white);
+  display:flex;align-items:center;justify-content:center}
+
+/* ── 16:9 stage, scaled to fit ── */
+#viewport{position:relative;width:100vw;height:100vh;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;
+  transform-origin:0 0;overflow:hidden;
+  background:radial-gradient(120% 90% at 50% 40%,var(--navy2) 0%,var(--navy) 60%,#030a1c 100%)}
+#bg{position:absolute;inset:0;width:100%;height:100%}
+.scene{position:absolute;inset:0;opacity:0;will-change:opacity}
+.a{will-change:transform,opacity;display:inline-block}
+.abs{position:absolute}
+.center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.en{font-family:'Plus Jakarta Sans','Noto Sans KR',sans-serif}
+.eyebrow{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;letter-spacing:.42em;
+  font-size:26px;color:var(--sky);text-transform:uppercase}
+.ch{display:inline-block;white-space:pre}
+.head>.a{display:block}
+
+/* S1 intro */
+#s1 .year{font-family:'Plus Jakarta Sans';font-weight:800;font-size:300px;line-height:1;
+  color:transparent;-webkit-text-stroke:2px rgba(92,200,255,.55);letter-spacing:-.02em}
+#s1 .word{font-family:'Plus Jakarta Sans';font-weight:800;font-size:132px;letter-spacing:.06em;line-height:1}
+#s1 .kr{font-weight:900;font-size:96px;letter-spacing:.32em;margin-top:28px;padding-left:.32em}
+#s1 .sweep{position:absolute;top:0;bottom:0;width:340px;
+  background:linear-gradient(90deg,transparent,rgba(92,200,255,.28),transparent);transform:skewX(-18deg)}
+#s1 .rule{height:4px;width:520px;background:linear-gradient(90deg,var(--sky),var(--mint));margin-top:40px;transform-origin:center}
+
+/* S2 founder quote */
+#s2 .q{font-weight:900;font-size:92px;line-height:1.35;letter-spacing:-.01em}
+#s2 .q em{font-style:normal;color:var(--gold)}
+#s2 .mark{font-family:Georgia,serif;font-size:360px;line-height:1;color:var(--blue);opacity:.5;
+  position:absolute;left:170px;top:120px}
+#s2 .by{margin-top:60px;font-size:36px;font-weight:500;color:var(--mute)}
+#s2 .by b{color:var(--white);font-weight:700}
+#s2 .tags{display:flex;gap:18px;margin-top:28px}
+#s2 .tag{border:2px solid rgba(92,200,255,.5);border-radius:999px;padding:10px 30px;font-size:28px;color:var(--sky);font-weight:500}
+
+/* S3 philosophy */
+#s3 .ring{position:absolute;top:290px;width:500px;height:500px;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;mix-blend-mode:screen}
+#s3 .ring.l{left:500px;background:radial-gradient(circle,rgba(31,95,224,.55),rgba(31,95,224,.12) 70%);border:3px solid var(--blue)}
+#s3 .ring.r{left:920px;background:radial-gradient(circle,rgba(62,224,168,.45),rgba(62,224,168,.1) 70%);border:3px solid var(--mint)}
+#s3 .ring .t{font-size:58px;font-weight:900}
+#s3 .ring .s{font-size:28px;color:var(--mute);margin-top:12px;font-family:'Plus Jakarta Sans';letter-spacing:.2em;font-weight:700}
+#s3 .ring.l .t,#s3 .ring.l .s{margin-right:90px}
+#s3 .ring.r .t,#s3 .ring.r .s{margin-left:90px}
+#s3 .head{position:absolute;top:120px;left:0;right:0;text-align:center}
+#s3 .head h2{font-size:64px;font-weight:900;margin-top:18px}
+#s3 .heart{position:absolute;left:910px;top:490px;width:100px;height:100px}
+#s3 .foot{position:absolute;bottom:120px;left:0;right:0;text-align:center;font-size:38px;font-weight:500;color:#dbe6ff}
+#s3 .foot b{color:var(--gold)}
+
+/* S4 AI */
+#s4 svg.net{position:absolute;inset:0}
+#s4 .panel{position:absolute;left:150px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;width:900px}
+#s4 h2{font-size:150px;font-weight:900;line-height:1.05;letter-spacing:-.02em}
+#s4 h2 .ai{font-family:'Plus Jakarta Sans';background:linear-gradient(90deg,var(--sky),var(--mint));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+#s4 .sub{font-size:40px;color:#dbe6ff;margin-top:30px;font-weight:500;line-height:1.5}
+#s4 .chip{margin-top:44px;display:inline-flex;align-items:center;gap:16px;padding:16px 34px;border-radius:14px;
+  background:rgba(92,200,255,.12);border:2px solid rgba(92,200,255,.45);font-family:'Plus Jakarta Sans';font-weight:800;font-size:34px;letter-spacing:.08em;color:var(--sky);align-self:flex-start}
+#s4 .chip i{width:14px;height:14px;border-radius:50%;background:var(--mint);display:inline-block}
+
+/* S5 wellness timeline */
+#s5 .head{position:absolute;top:110px;left:150px}
+#s5 h2{font-size:82px;font-weight:900;margin-top:18px}
+#s5 h2 em{font-style:normal;color:var(--mint)}
+#s5 svg.ecg{position:absolute;left:0;top:330px;width:1920px;height:140px}
+#s5 .line{position:absolute;left:190px;top:640px;width:1540px;height:4px;background:rgba(255,255,255,.18);transform-origin:left center}
+#s5 .node{position:absolute;top:640px;width:340px;margin-left:-170px}
+#s5 .dot{width:34px;height:34px;border-radius:50%;background:var(--navy);border:6px solid var(--sky);margin:-15px auto 0}
+#s5 .node .yr{font-family:'Plus Jakarta Sans';font-weight:800;font-size:56px;text-align:center;margin-top:34px;color:var(--sky)}
+#s5 .node .dp{font-size:36px;font-weight:700;text-align:center;margin-top:8px;line-height:1.35}
+#s5 .node.hl .dot{border-color:var(--gold);box-shadow:0 0 0 14px rgba(246,196,83,.18)}
+#s5 .node.hl .yr{color:var(--gold)}
+#s5 .badge{display:inline-block;margin-top:14px;font-size:26px;font-weight:700;color:var(--navy);background:var(--gold);padding:6px 18px;border-radius:999px}
+
+/* S6 numbers */
+#s6 .grid{position:absolute;left:150px;right:150px;top:0;bottom:0;display:grid;grid-template-columns:1.25fr 1fr;gap:80px;align-items:center}
+#s6 .big{font-family:'Plus Jakarta Sans';font-weight:800;font-size:300px;line-height:.9;letter-spacing:-.04em}
+#s6 .big small{font-size:140px;color:var(--sky)}
+#s6 .cap{font-size:44px;font-weight:700;margin-top:26px}
+#s6 .cap em{font-style:normal;color:var(--gold)}
+#s6 .note{font-size:26px;color:var(--mute);margin-top:14px}
+#s6 .awards{display:flex;flex-direction:column;gap:34px}
+#s6 .aw{display:flex;gap:28px;align-items:center;padding:34px 40px;border-radius:24px;
+  background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.02));border:1.5px solid rgba(255,255,255,.16)}
+#s6 .aw svg{flex:none}
+#s6 .aw .y{font-family:'Plus Jakarta Sans';font-weight:800;color:var(--gold);font-size:28px;letter-spacing:.1em}
+#s6 .aw .n{font-size:42px;font-weight:900;margin-top:4px}
+#s6 .aw .d{font-size:26px;color:var(--mute);margin-top:4px}
+
+/* S7 outro */
+#s7 .l1,#s7 .l2{font-weight:900;font-size:120px;line-height:1.2;letter-spacing:-.02em}
+#s7 .l2 em{font-style:normal}
+#s7 .l2 em .ch{background:linear-gradient(90deg,var(--sky),var(--mint));-webkit-background-clip:text;background-clip:text;color:transparent}
+#s7 .mark{margin-top:90px;display:flex;flex-direction:column;align-items:center}
+#s7 .mark .e{font-family:'Plus Jakarta Sans';font-weight:800;font-size:44px;letter-spacing:.3em;padding-left:.3em}
+#s7 .mark .k{font-weight:900;font-size:64px;letter-spacing:.3em;padding-left:.3em;margin-top:10px}
+#s7 .mark .u{font-family:'Plus Jakarta Sans';font-size:30px;color:var(--mute);margin-top:22px;letter-spacing:.08em}
+#s7 .bar{width:420px;height:4px;background:linear-gradient(90deg,var(--sky),var(--mint));margin:0 auto 34px}
+
+/* letterbox + vignette */
+#vignette{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+
+/* ── controls ── */
+#ui{position:absolute;left:16px;right:16px;bottom:16px;display:flex;align-items:center;gap:14px;
+  padding:10px 16px;border-radius:14px;background:var(--ui-bg);backdrop-filter:blur(10px);color:var(--ui-fg);
+  font:500 14px 'Plus Jakarta Sans','Noto Sans KR',sans-serif;transition:opacity .4s;z-index:5}
+#ui.hide{opacity:0}
+#ui button{background:none;border:0;color:inherit;cursor:pointer;width:34px;height:34px;border-radius:8px;display:grid;place-items:center}
+#ui button:hover{background:rgba(255,255,255,.12)}
+#ui button:focus-visible{outline:2px solid var(--sky)}
+#bar{flex:1;position:relative;height:22px;cursor:pointer;display:flex;align-items:center}
+#bar .track{position:absolute;left:0;right:0;height:4px;border-radius:2px;background:rgba(255,255,255,.22)}
+#bar .fill{position:absolute;left:0;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--sky),var(--mint))}
+#bar .tick{position:absolute;width:2px;height:10px;background:rgba(255,255,255,.4)}
+#time{font-variant-numeric:tabular-nums;min-width:86px;text-align:right}
+#hint{position:absolute;top:16px;left:50%;transform:translateX(-50%);font:500 13px 'Noto Sans KR',sans-serif;
+  color:var(--ui-fg);background:var(--ui-bg);padding:8px 14px;border-radius:999px;transition:opacity .6s;z-index:5;white-space:nowrap}
+body.render #ui,body.render #hint{display:none}
+@media (max-width:520px){#time{min-width:0;font-size:12px}#hint{display:none}}
+</style>
+</head>
+<body>
+<div id="viewport">
+<div id="stage">
+  <canvas id="bg" width="1920" height="1080"></canvas>
+
+  <!-- S1 · Intro -->
+  <section class="scene" id="s1">
+    <div class="sweep" id="s1sweep"></div>
+    <div class="center">
+      <div class="a year" id="s1year">1977</div>
+    </div>
+    <div class="center">
+      <div class="eyebrow a" id="s1eyebrow">Since 1977 · Bucheon, Gyeonggi</div>
+      <div class="word split" id="s1word" style="margin-top:34px">YUHAN UNIVERSITY</div>
+      <div class="kr split" id="s1kr">유한대학교</div>
+      <div class="rule a" id="s1rule"></div>
+    </div>
+  </section>
+
+  <!-- S2 · Founding spirit -->
+  <section class="scene" id="s2">
+    <div class="mark a" id="s2mark">“</div>
+    <div class="center">
+      <div class="eyebrow a" id="s2eyebrow">건학이념 · Founding Spirit</div>
+      <div class="q" style="margin-top:46px">
+        <div class="split" id="s2q1">기업에서 얻은 이익은</div>
+        <div class="split" id="s2q2">그 기업을 키워준 <em>사회에 환원</em>한다</div>
+      </div>
+      <div class="by a" id="s2by">설립자 <b>유일한 박사</b></div>
+      <div class="tags">
+        <span class="tag a" id="s2t1">독립운동가</span>
+        <span class="tag a" id="s2t2">기업인</span>
+        <span class="tag a" id="s2t3">교육자</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- S3 · Philosophy -->
+  <section class="scene" id="s3">
+    <div class="head">
+      <div class="eyebrow a" id="s3eyebrow">Education Philosophy</div>
+      <h2 class="a" id="s3h">유일한 박사의 교육철학</h2>
+    </div>
+    <div class="ring l a" id="s3l"><div class="t">쓰임의 교육</div><div class="s">USEFULNESS</div></div>
+    <div class="ring r a" id="s3r"><div class="t">나눔의 교육</div><div class="s">SHARING</div></div>
+    <svg class="heart a" id="s3heart" viewBox="0 0 24 24"><path fill="#f6c453" d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 3.1 4.5 6.8 4.5c2.1 0 3.6 1.1 5.2 3 1.6-1.9 3.1-3 5.2-3 3.7 0 5.9 3.8 4.4 7.2C19.5 16.4 12 21 12 21z"/></svg>
+    <div class="foot a" id="s3foot">사회에 꼭 <b>쓰이는</b> 전문성, 함께 <b>나누는</b> 인성</div>
+  </section>
+
+  <!-- S4 · AI -->
+  <section class="scene" id="s4">
+    <svg class="net" id="s4net" viewBox="0 0 1920 1080"></svg>
+    <div class="panel">
+      <div class="eyebrow a" id="s4eyebrow">Yuhan Vision 2030</div>
+      <h2 style="margin-top:24px"><span class="a" id="s4h1"><span class="ai">AI</span> 중심대학</span></h2>
+      <div class="sub a" id="s4sub">미래 교육 혁신을 위해<br>인공지능을 대학 발전의 핵심 전략으로</div>
+      <div class="chip a" id="s4chip"><i></i>AI-SPECIALIZED UNIVERSITY</div>
+    </div>
+  </section>
+
+  <!-- S5 · Health & Wellness -->
+  <section class="scene" id="s5">
+    <div class="head">
+      <div class="eyebrow a" id="s5eyebrow">Health · Wellness</div>
+      <h2 class="a" id="s5h">보건·<em>웰니스</em> 특성화, 계속 넓어집니다</h2>
+    </div>
+    <svg class="ecg" viewBox="0 0 1920 140" preserveAspectRatio="none">
+      <path id="s5ecg" fill="none" stroke="#3ee0a8" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"
+        d="M0 70 H360 L390 70 L410 40 L430 100 L455 10 L480 130 L500 70 H860 L890 70 L910 40 L930 100 L955 10 L980 130 L1000 70 H1360 L1390 70 L1410 40 L1430 100 L1455 10 L1480 130 L1500 70 H1920"/>
+    </svg>
+    <div class="line" id="s5line"></div>
+    <div class="node a" id="s5n1" style="left:300px"><div class="dot"></div><div class="yr">2024</div><div class="dp">작업치료과<br>반려동물보건학과</div></div>
+    <div class="node a" id="s5n2" style="left:700px"><div class="dot"></div><div class="yr">2025</div><div class="dp">응급구조과</div></div>
+    <div class="node a" id="s5n3" style="left:1100px"><div class="dot"></div><div class="yr">2026</div><div class="dp">치위생학과</div></div>
+    <div class="node hl a" id="s5n4" style="left:1500px"><div class="dot"></div><div class="yr">2027</div><div class="dp">간호학과</div><div style="text-align:center"><span class="badge">신설 · 60명 모집</span></div></div>
+  </section>
+
+  <!-- S6 · Proof -->
+  <section class="scene" id="s6">
+    <div class="grid">
+      <div>
+        <div class="eyebrow a" id="s6eyebrow">Employment</div>
+        <div class="big a" id="s6big" style="margin-top:20px"><span id="s6num">0.0</span><small>%</small></div>
+        <div class="cap a" id="s6cap">인천·부천·김포 지역 전문대학 <em>취업률 1위</em></div>
+        <div class="note a" id="s6note">2021 고등교육기관 졸업생 취업통계 기준 (1,727명 중 1,249명 취업)</div>
+      </div>
+      <div class="awards">
+        <div class="aw a" id="s6a1">
+          <svg width="84" height="84" viewBox="0 0 24 24" fill="none" stroke="#f6c453" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M8.5 14.2 7 22l5-3 5 3-1.5-7.8"/></svg>
+          <div><div class="y">2026</div><div class="n">K-최고의 브랜드 대상</div><div class="d">국회 교육위원장 표창</div></div>
+        </div>
+        <div class="aw a" id="s6a2">
+          <svg width="84" height="84" viewBox="0 0 24 24" fill="none" stroke="#f6c453" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3M12 14v4M8 21h8M9 18h6"/></svg>
+          <div><div class="y">2026</div><div class="n">고객사랑 브랜드 대상</div><div class="d">전문대학 부문 대상</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- S7 · Outro -->
+  <section class="scene" id="s7">
+    <div class="center">
+      <div class="l1 split" id="s7l1">쓰임과 나눔의 인재,</div>
+      <div class="l2 split" id="s7l2"><em>유한</em>에서 시작합니다</div>
+      <div class="mark">
+        <div class="bar a" id="s7bar"></div>
+        <div class="e a" id="s7e">YUHAN UNIVERSITY</div>
+        <div class="k a" id="s7k">유한대학교</div>
+        <div class="u a" id="s7u">www.yuhan.ac.kr</div>
+      </div>
+    </div>
+  </section>
+
+  <div id="vignette"></div>
+</div>
+
+<div id="hint">Space 재생/일시정지 · ←/→ 5초 이동 · R 처음부터</div>
+<div id="ui" role="group" aria-label="재생 컨트롤">
+  <button id="play" aria-label="재생/일시정지"></button>
+  <button id="restart" aria-label="처음부터"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+  <div id="bar" role="slider" aria-label="재생 위치" tabindex="0"><div class="track"></div><div class="fill" id="fill"></div></div>
+  <div id="time">0:00 / 0:00</div>
+  <button id="fs" aria-label="전체화면"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+</div>
+</div>
+
+<script>
+(() => {
+/* ═══════════════════════════════════════════════
+   Deterministic timeline: everything is a pure
+   function of time t (seconds), so it can be
+   scrubbed, looped, or rendered frame-by-frame.
+   ═══════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+const E = {
+  out: k => 1 - Math.pow(1 - k, 3),
+  inOut: k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2,
+  back: k => { const c = 1.7; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); },
+  expo: k => k === 1 ? 1 : 1 - Math.pow(2, -10 * k),
+  lin: k => k,
+};
+
+/* Scenes: [id, start, end] */
+const SCENES = [
+  ['s1', 0, 7], ['s2', 7, 15.5], ['s3', 15.5, 23], ['s4', 23, 31],
+  ['s5', 31, 40], ['s6', 40, 47.5], ['s7', 47.5, 56],
+];
+const DURATION = 56;
+const FADE = .6;
+
+/* split text into chars (keeps inline markup like <em>) */
+function split(el) {
+  const out = [];
+  const walk = node => {
+    [...node.childNodes].forEach(n => {
+      if (n.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        [...n.textContent].forEach(c => {
+          const s = document.createElement('span');
+          s.className = 'ch'; s.textContent = c; frag.appendChild(s); out.push(s);
+        });
+        n.replaceWith(frag);
+      } else walk(n);
+    });
+  };
+  walk(el);
+  return out;
+}
+const chars = {};
+document.querySelectorAll('.split').forEach(el => chars[el.id] = split(el));
+
+/* keyframe tracks: props o,x,y,s,r,blur,sx */
+const tracks = [];
+function tr(el, keys, ease = E.out) { tracks.push({ el: typeof el === 'string' ? $(el) : el, keys, ease }); }
+/* convenience: enter at t0 from offset, exit at t1 */
+function enter(el, t0, from = {}, d = .9, ease = E.out) {
+  tr(el, [{ t: t0, o: 0, ...from }, { t: t0 + d, o: 1, x: 0, y: 0, s: 1, r: 0, blur: 0 }], ease);
+}
+function stagger(id, t0, step, from, d = .7, ease = E.out) {
+  chars[id].forEach((c, i) => enter(c, t0 + i * step, from, d, ease));
+}
+const DEF = { o: 1, x: 0, y: 0, s: 1, r: 0, blur: 0, sx: 1 };
+function sample(keys, t, ease) {
+  if (t <= keys[0].t) return { ...DEF, ...keys[0] };
+  for (let i = 0; i < keys.length - 1; i++) {
+    const a = keys[i], b = keys[i + 1];
+    if (t <= b.t) {
+      const k = (b.ease || ease)(clamp((t - a.t) / (b.t - a.t)));
+      const r = {};
+      for (const p in DEF) r[p] = lerp(a[p] ?? DEF[p], b[p] ?? a[p] ?? DEF[p], k);
+      return r;
+    }
+  }
+  return { ...DEF, ...keys[keys.length - 1] };
+}
+function apply(el, v) {
+  el.style.opacity = v.o.toFixed(3);
+  el.style.transform = `translate(${v.x.toFixed(1)}px,${v.y.toFixed(1)}px) scale(${(v.s * v.sx).toFixed(4)},${v.s.toFixed(4)}) rotate(${v.r.toFixed(2)}deg)`;
+  el.style.filter = v.blur > .05 ? `blur(${v.blur.toFixed(1)}px)` : '';
+}
+
+/* ── S1 Intro ── */
+tr('s1year', [{ t: 0, o: 0, s: 1.25, blur: 20 }, { t: 1.2, o: 1, s: 1, blur: 0 }, { t: 2.3, o: 1, s: .96 }, { t: 2.9, o: 0, s: .8, blur: 10 }]);
+enter('s1eyebrow', 2.8, { y: 20 });
+stagger('s1word', 3.0, .045, { y: 60, blur: 12 }, .8);
+stagger('s1kr', 3.7, .09, { y: 40, s: .6 }, .8, E.back);
+tr('s1rule', [{ t: 4.3, o: 0, sx: 0 }, { t: 5.3, o: 1, sx: 1 }], E.inOut);
+tr('s1sweep', [{ t: 3.2, o: 1, x: -500 }, { t: 5.2, o: 1, x: 2300 }], E.inOut);
+
+/* ── S2 Founder ── */
+tr('s2mark', [{ t: 7.2, o: 0, y: 60, s: .7 }, { t: 8.2, o: .5, y: 0, s: 1 }]);
+enter('s2eyebrow', 7.3, { y: 20 });
+stagger('s2q1', 7.8, .06, { y: 30, blur: 8 }, .6);
+stagger('s2q2', 9.0, .06, { y: 30, blur: 8 }, .6);
+enter('s2by', 11.4, { y: 24 });
+['s2t1', 's2t2', 's2t3'].forEach((id, i) => enter(id, 12.0 + i * .2, { y: 20, s: .8 }, .7, E.back));
+
+/* ── S3 Philosophy ── */
+enter('s3eyebrow', 15.8, { y: 20 });
+enter('s3h', 16.0, { y: 30 });
+tr('s3l', [{ t: 16.5, o: 0, x: -420, s: .8 }, { t: 17.8, o: 1, x: 0, s: 1 }], E.inOut);
+tr('s3r', [{ t: 16.5, o: 0, x: 420, s: .8 }, { t: 17.8, o: 1, x: 0, s: 1 }], E.inOut);
+tr('s3heart', [{ t: 18.0, o: 0, s: 0 }, { t: 18.6, o: 1, s: 1.2, ease: E.back }, { t: 19.0, s: 1 }, { t: 19.3, s: 1.18 }, { t: 19.6, s: 1 }, { t: 19.9, s: 1.18 }, { t: 20.2, s: 1 }], E.out);
+enter('s3foot', 19.0, { y: 30 });
+
+/* ── S4 AI: build a neural net in SVG ── */
+const net = $('s4net'); const NS = 'http://www.w3.org/2000/svg';
+const layers = [4, 6, 6, 3]; const nodes = [];
+layers.forEach((n, li) => {
+  const x = 1120 + li * 210;
+  for (let i = 0; i < n; i++) nodes.push({ li, x, y: 540 + (i - (n - 1) / 2) * 120 });
+});
+const edges = [];
+nodes.forEach(a => nodes.forEach(b => { if (b.li === a.li + 1) edges.push([a, b]); }));
+edges.forEach(([a, b], i) => {
+  const l = document.createElementNS(NS, 'line');
+  Object.entries({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: '#5cc8ff', 'stroke-width': 1.6 }).forEach(([k, v]) => l.setAttribute(k, v));
+  const len = Math.hypot(b.x - a.x, b.y - a.y);
+  l.style.strokeDasharray = len; l.dataset.len = len; l.dataset.t0 = 23.6 + a.li * .55 + (i % 7) * .04;
+  net.appendChild(l); edges[i].el = l;
+});
+nodes.forEach((n, i) => {
+  const c = document.createElementNS(NS, 'circle');
+  c.setAttribute('cx', n.x); c.setAttribute('cy', n.y); c.setAttribute('r', 13);
+  c.setAttribute('fill', '#071634'); c.setAttribute('stroke', n.li === 3 ? '#3ee0a8' : '#5cc8ff'); c.setAttribute('stroke-width', 4);
+  c.style.transformBox = 'fill-box'; c.style.transformOrigin = 'center';
+  net.appendChild(c); n.el = c; n.t0 = 23.4 + n.li * .55 + i * .02;
+});
+const pulses = [];
+for (let i = 0; i < 14; i++) {
+  const c = document.createElementNS(NS, 'circle'); c.setAttribute('r', 6); c.setAttribute('fill', '#3ee0a8');
+  net.appendChild(c); pulses.push({ el: c, e: edges[(i * 37) % edges.length], off: i * .29 });
+}
+enter('s4eyebrow', 23.4, { y: 20 });
+enter('s4h1', 23.7, { y: 60, blur: 14 }, 1.0);
+enter('s4sub', 24.6, { y: 30 });
+enter('s4chip', 25.4, { y: 20, s: .9 }, .8, E.back);
+
+/* ── S5 Wellness ── */
+enter('s5eyebrow', 31.3, { y: 20 });
+enter('s5h', 31.5, { y: 30 });
+tr('s5line', [{ t: 32.6, o: 1, sx: 0 }, { t: 35.6, o: 1, sx: 1 }], E.inOut);
+['s5n1', 's5n2', 's5n3', 's5n4'].forEach((id, i) => enter(id, 33.0 + i * .75, { y: 40 }, .8, E.back));
+const ecg = $('s5ecg'); const ecgLen = ecg.getTotalLength(); ecg.style.strokeDasharray = ecgLen;
+
+/* ── S6 Numbers ── */
+enter('s6eyebrow', 40.3, { y: 20 });
+enter('s6big', 40.4, { y: 40 });
+enter('s6cap', 41.6, { y: 24 });
+enter('s6note', 42.0, { y: 16 });
+enter('s6a1', 42.4, { x: 80 }, .9);
+enter('s6a2', 42.8, { x: 80 }, .9);
+
+/* ── S7 Outro ── */
+stagger('s7l1', 47.9, .06, { y: 50, blur: 10 }, .7);
+stagger('s7l2', 49.0, .07, { y: 50, blur: 10 }, .7);
+tr('s7bar', [{ t: 50.8, o: 1, sx: 0 }, { t: 51.8, o: 1, sx: 1 }], E.inOut);
+enter('s7e', 51.2, { y: 20 }); enter('s7k', 51.5, { y: 20 }); enter('s7u', 52.0, { y: 14 });
+
+/* ── Background: drifting particles + glows ── */
+const bg = $('bg'), g = bg.getContext('2d');
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const P = Array.from({ length: 140 }, () => ({ x: rnd() * 1920, y: rnd() * 1080, r: .6 + rnd() * 2.2, vx: (rnd() - .5) * 14, vy: -6 - rnd() * 18, ph: rnd() * 6.28 }));
+const sceneHue = [[92, 200, 255], [246, 196, 83], [62, 224, 168], [92, 200, 255], [62, 224, 168], [246, 196, 83], [92, 200, 255]];
+function drawBg(t) {
+  g.clearRect(0, 0, 1920, 1080);
+  // scene-tinted glows
+  const si = Math.max(0, SCENES.findIndex(s => t < s[2]));
+  const [r, gg, b] = sceneHue[si === -1 ? 6 : si];
+  const gx = 960 + Math.sin(t * .25) * 520, gy = 540 + Math.cos(t * .19) * 260;
+  let grd = g.createRadialGradient(gx, gy, 0, gx, gy, 760);
+  grd.addColorStop(0, `rgba(${r},${gg},${b},.16)`); grd.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 1920, 1080);
+  const hx = 1920 - gx * .6, hy = 1080 - gy * .7;
+  grd = g.createRadialGradient(hx, hy, 0, hx, hy, 620);
+  grd.addColorStop(0, 'rgba(31,95,224,.22)'); grd.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 1920, 1080);
+  // grid
+  g.strokeStyle = 'rgba(92,200,255,.05)'; g.lineWidth = 1;
+  const off = (t * 12) % 80;
+  for (let x = -off; x < 1920; x += 80) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 1080); g.stroke(); }
+  for (let y = off; y < 1080; y += 80) { g.beginPath(); g.moveTo(0, y); g.lineTo(1920, y); g.stroke(); }
+  // particles
+  P.forEach(p => {
+    const x = ((p.x + p.vx * t) % 1920 + 1920) % 1920;
+    const y = ((p.y + p.vy * t) % 1080 + 1080) % 1080;
+    const a = .25 + .35 * (.5 + .5 * Math.sin(t * 1.3 + p.ph));
+    g.fillStyle = `rgba(200,230,255,${a.toFixed(3)})`;
+    g.beginPath(); g.arc(x, y, p.r, 0, 6.283); g.fill();
+  });
+}
+
+/* ── render(t) ── */
+const sceneEls = SCENES.map(([id]) => $(id));
+function render(t) {
+  drawBg(t);
+  SCENES.forEach(([id, a, b], i) => {
+    const last = i === SCENES.length - 1;
+    let o = clamp((t - a) / FADE) * (last ? 1 : clamp((b - t) / FADE));
+    if (i === 0) o = t < b ? clamp((b - t) / FADE) : 0;
+    const el = sceneEls[i];
+    el.style.opacity = o.toFixed(3);
+    el.style.visibility = o > 0 ? 'visible' : 'hidden';
+    // gentle push-in on exit
+    const ex = last ? 0 : clamp((t - (b - FADE)) / FADE);
+    el.style.transform = ex > 0 ? `scale(${(1 + ex * .04).toFixed(4)})` : '';
+    el.style.filter = ex > 0 ? `blur(${(ex * 6).toFixed(1)}px)` : '';
+  });
+  tracks.forEach(k => apply(k.el, sample(k.keys, t, k.ease)));
+  // S4 net
+  edges.forEach(e => {
+    const k = E.inOut(clamp((t - e.el.dataset.t0) / .7));
+    e.el.style.strokeDashoffset = (e.el.dataset.len * (1 - k)).toFixed(1);
+    e.el.style.opacity = (.12 + .3 * k).toFixed(3);
+  });
+  nodes.forEach(n => {
+    const k = E.back(clamp((t - n.t0) / .5));
+    n.el.style.transform = `scale(${k.toFixed(3)})`;
+    n.el.style.opacity = clamp(k).toFixed(3);
+  });
+  pulses.forEach(p => {
+    const k = ((t - 25.2 + p.off) % 1.4) / 1.4; const [a, b] = p.e;
+    const on = t > 25.2;
+    p.el.setAttribute('cx', lerp(a.x, b.x, k).toFixed(1)); p.el.setAttribute('cy', lerp(a.y, b.y, k).toFixed(1));
+    p.el.style.opacity = on ? (Math.sin(k * Math.PI)).toFixed(3) : 0;
+  });
+  // S5 ECG
+  const ek = E.inOut(clamp((t - 31.6) / 2.4));
+  ecg.style.strokeDashoffset = (ecgLen * (1 - ek)).toFixed(1);
+  // S6 counter
+  const ck = E.expo(clamp((t - 40.6) / 2.0));
+  $('s6num').textContent = (72.3 * ck).toFixed(1);
+}
+
+/* ── stage scaling ── */
+const stage = $('stage');
+function fit() {
+  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+  stage.style.transform = `scale(${s}) translate(-50%,-50%)`;
+}
+addEventListener('resize', fit); fit();
+
+/* ── playback ── */
+const params = new URLSearchParams(location.search);
+const RENDER = params.has('render');
+if (RENDER) document.body.classList.add('render');
+let t = 0, playing = !RENDER, last = performance.now();
+const ICON_PLAY = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
+const ICON_PAUSE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>';
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+const fill = $('fill'), time = $('time'), bar = $('bar'), playBtn = $('play');
+SCENES.slice(1).forEach(([, a]) => { const d = document.createElement('div'); d.className = 'tick'; d.style.left = (a / DURATION * 100) + '%'; bar.appendChild(d); });
+function ui() {
+  fill.style.width = (t / DURATION * 100) + '%';
+  time.textContent = `${fmt(t)} / ${fmt(DURATION)}`;
+  playBtn.innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
+  bar.setAttribute('aria-valuenow', Math.round(t));
+}
+function seek(v) { t = clamp(v, 0, DURATION); render(t); ui(); }
+function toggle() { if (t >= DURATION) t = 0; playing = !playing; last = performance.now(); ui(); }
+function loop(now) {
+  if (playing) {
+    t += Math.min(.1, (now - last) / 1000);
+    if (t >= DURATION) { t = DURATION; playing = false; }
+    render(t); ui();
+  }
+  last = now;
+  requestAnimationFrame(loop);
+}
+playBtn.onclick = toggle;
+$('restart').onclick = () => { seek(0); playing = true; ui(); };
+$('fs').onclick = () => document.fullscreenElement ? document.exitFullscreen() : $('viewport').requestFullscreen?.();
+let drag = false;
+const scrub = e => { const r = bar.getBoundingClientRect(); seek((e.clientX - r.left) / r.width * DURATION); };
+bar.addEventListener('pointerdown', e => { drag = true; bar.setPointerCapture(e.pointerId); scrub(e); });
+bar.addEventListener('pointermove', e => drag && scrub(e));
+bar.addEventListener('pointerup', () => drag = false);
+addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); toggle(); }
+  else if (e.key === 'ArrowRight') seek(t + 5);
+  else if (e.key === 'ArrowLeft') seek(t - 5);
+  else if (e.key === 'r' || e.key === 'R') { seek(0); playing = true; ui(); }
+});
+let idle; const uiEl = $('ui'), hint = $('hint');
+const wake = () => { uiEl.classList.remove('hide'); clearTimeout(idle); idle = setTimeout(() => playing && uiEl.classList.add('hide'), 2500); };
+addEventListener('pointermove', wake); addEventListener('keydown', wake); wake();
+setTimeout(() => hint.style.opacity = 0, 4000);
+$('viewport').addEventListener('click', e => { if (!uiEl.contains(e.target)) toggle(); });
+
+/* hook for frame-accurate video export */
+window.__motion = { duration: DURATION, seek: v => { playing = false; seek(v); } };
+
+const start = () => { seek(0); requestAnimationFrame(loop); };
+(document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(start);
+})();
+</script>
+</body>
+</html>
